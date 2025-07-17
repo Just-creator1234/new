@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // or "mysql", "sqlite", etc.
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  WRITER
+  ADMIN
+}
+
+model User {
+  id                      String               @id @default(cuid())
+  email                   String               @unique
+  password                String
+   slug                   String                 @unique
+  emailVerified           DateTime?
+  name                    String?
+  verificationToken       String?
+  accounts                Account[]
+  role                    Role                 @default(WRITER)
+  verificationTokenExpiry DateTime?
+  sessions                Session[]
+    posts                   Post[]             @relation("Posts")
+  PasswordResetToken      PasswordResetToken[]
+
+}
+
+model Post {
+  id               String   @id @default(cuid())
+  title            String
+  slug             String   @unique
+  subtitle         String?
+  content          Json     // Tiptap JSON
+  excerpt          String?
+  published        Boolean  @default(false)
+  status           String   @default("DRAFT") // DRAFT | PUBLISHED | SCHEDULED
+  publishDate      DateTime? // when status === SCHEDULED
+
+  /* Author(s) */
+  author   User   @relation("Posts", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String
+  coAuthors Json? // array of user emails or IDs
+
+  /* Media */
+  coverImage String? // URL
+  altText    String?
+  gallery    Json?   // array of URLs
+  videoUrl   String?
+  audioUrl   String?
+
+  /* Taxonomy */
+  categories Category[]
+  tags       Tag[]
+
+  /* SEO */
+  metaTitle         String?
+  metaDescription   String?
+  focusKeyword      String?
+  canonicalUrl      String?
+  targetKeywords    Json? // string[]
+  ogTitle           String?
+  ogDescription     String?
+  ogImage           String?
+  twitterCard       String? @default("summary_large_image")
+
+  /* Advanced */
+  difficulty        String? @default("beginner") // beginner | intermediate | advanced
+  language          String? @default("en")
+  series            String?
+  seriesOrder       Int?    @default(1)
+  visibility        String? @default("public") // public | private | password-protected
+  password          String?
+  allowComments     Boolean @default(true)
+  allowSharing      Boolean @default(true)
+  featured          Boolean @default(false)
+  sticky            Boolean @default(false)
+  editorNotes       String?
+  customFields      Json?   // arbitrary key/value pairs
+
+  /* Timestamps */
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Category {
+  id    String @id @default(cuid())
+  name  String @unique
+  slug  String @unique
+
+  posts Post[]
+}
+
+
+model Tag {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  posts Post[]
+}
+
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+}
