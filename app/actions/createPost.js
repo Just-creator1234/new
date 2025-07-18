@@ -31,8 +31,8 @@ export async function createPost(formData) {
       slug: uniqueSlug,
       content: data.content,
       excerpt: data.excerpt,
-      published: data.status === "PUBLISHED",
-      status: data.status,
+      status: data.status, 
+      published: data.status === "PUBLISHED", 
       publishDate: data.publishDate ? new Date(data.publishDate) : null,
 
       coverImage: data.coverImage || null,

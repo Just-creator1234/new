@@ -1402,6 +1402,7 @@ export default function EnhancedCreatePostPage() {
   };
 
   const handleSubmit = (action) => {
+    console.log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
     if (!validate()) return;
     setIsSubmitting(true);
     submitForm(action);
@@ -1451,7 +1452,7 @@ export default function EnhancedCreatePostPage() {
     try {
       const res = await createPost(fd);
       toast.success(res.message || "Post created!");
-      router.push("/Blogs");
+      router.push("/My-blogs");
     } catch {
       toast.error("Failed to create post");
     } finally {
@@ -1504,19 +1505,17 @@ export default function EnhancedCreatePostPage() {
               Preview
             </button>
             <button
-              onClick={handleSaveDraft}
-              disabled={isSubmitting}
-              className="inline-flex items-center gap-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-            >
-              <FiSave className="h-4 w-4" />
-              Save Draft
-            </button>
-            <button
-              onClick={() => handleSubmit("PUBLISHED")}
+              onClick={() => handleSubmit(status)} // status is "DRAFT", "PUBLISHED", or "SCHEDULED"
               disabled={isSubmitting}
               className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
-              {isSubmitting ? "Publishing…" : "Publish"}
+              {isSubmitting
+                ? "Saving…"
+                : status === "DRAFT"
+                ? "Save Draft"
+                : status === "SCHEDULED"
+                ? "Schedule"
+                : "Publish"}
             </button>
           </div>
         </div>
