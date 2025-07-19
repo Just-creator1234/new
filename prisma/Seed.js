@@ -4,7 +4,6 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const categories = [
-  { id: "breaking", name: "Breaking", slug: "breaking" },
   { id: "politics", name: "Politics", slug: "politics" },
   { id: "tech", name: "Tech", slug: "tech" },
   { id: "sports", name: "Sports", slug: "sports" },

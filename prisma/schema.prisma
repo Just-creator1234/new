@@ -85,6 +85,7 @@ model Post {
   allowSharing      Boolean @default(true)
   featured          Boolean @default(false)
   sticky            Boolean @default(false)
+   breaking      Boolean @default(false)
   editorNotes       String?
   customFields      Json?   // arbitrary key/value pairs
 
