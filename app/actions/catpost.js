@@ -3,9 +3,13 @@
 import prisma from "@/lib/prisma";
 
 /* --------------------------------------------------
-   1️⃣  Get posts for one category (or all)
+   1️⃣  Get posts for one category (or all) with sorting options
 -------------------------------------------------- */
-export async function getPostsByCategory(slug) {
+export async function getPostsByCategory(
+  slug,
+  sortBy = "latest",
+  limit = null
+) {
   try {
     const where = {
       published: true,
@@ -17,8 +21,20 @@ export async function getPostsByCategory(slug) {
       where.categories = { some: { slug } };
     }
 
+    let orderBy = [{ sticky: "desc" }];
+
+    if (sortBy === "latest") {
+      orderBy.push({ publishDate: "desc" });
+    } else if (sortBy === "popular") {
+      orderBy.push({ viewCount: "desc" });
+    } else if (sortBy === "trending") {
+      orderBy.push({ trendingScore: "desc" });
+    }
+
     const posts = await prisma.post.findMany({
       where,
+      ...(limit && { take: limit }),
+      orderBy,
       select: {
         id: true,
         slug: true,
@@ -31,13 +47,15 @@ export async function getPostsByCategory(slug) {
         breaking: true,
         featured: true,
         videoUrl: true,
+        viewCount: true,
+        trendingScore: true,
+        lastViewedAt: true,
         metaTitle: true,
         metaDescription: true,
         categories: { select: { slug: true, name: true } },
         author: { select: { id: true, name: true } },
         tags: { select: { name: true } },
       },
-      orderBy: [{ sticky: "desc" }, { publishDate: "desc" }],
     });
 
     return posts.map((post) => {
@@ -51,12 +69,14 @@ export async function getPostsByCategory(slug) {
         categoryName: post.categories[0]?.name || "General",
         author: { name: post.author.name || "Anonymous" },
         date: post.publishDate?.toISOString() || post.createdAt.toISOString(),
-        views: 0, // no viewCount column yet
+        views: post.viewCount || 0,
         readTime: calculateReadTime(wordCount),
         image: post.coverImage || "/default-article.jpg",
         videoUrl: post.videoUrl || null,
         isBreaking: post.breaking || false,
         isFeatured: post.featured || false,
+        trendingScore: post.trendingScore || 0,
+        lastViewed: post.lastViewedAt?.toISOString() || null,
         tags: post.tags.map((t) => t.name),
         ...(post.metaTitle && { metaTitle: post.metaTitle }),
         ...(post.metaDescription && { metaDescription: post.metaDescription }),
@@ -69,12 +89,125 @@ export async function getPostsByCategory(slug) {
 }
 
 /* --------------------------------------------------
-   2️⃣  Get all categories (without breaking)
+   2️⃣  Get popular posts within a category
+-------------------------------------------------- */
+export async function getPopularPostsByCategory(slug, limit = 5) {
+  try {
+    const where = {
+      published: true,
+      status: "PUBLISHED",
+      lastViewedAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }, // Last 7 days
+    };
+
+    if (slug && slug !== "all") {
+      where.categories = { some: { slug } };
+    }
+
+    const posts = await prisma.post.findMany({
+      where,
+      orderBy: [
+        { trendingScore: "desc" }, // Weighted score
+        { viewCount: "desc" }, // Fallback to total views
+      ],
+      take: limit,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        excerpt: true,
+        coverImage: true,
+        publishDate: true,
+        viewCount: true,
+        trendingScore: true,
+        categories: { select: { slug: true, name: true } },
+        author: { select: { name: true } },
+      },
+    });
+
+    return posts.map((post) => ({
+      id: post.id,
+      slug: post.slug,
+      title: post.title,
+      excerpt: post.excerpt,
+      category: post.categories[0]?.slug || "all",
+      categoryName: post.categories[0]?.name || "General",
+      author: { name: post.author.name || "Anonymous" },
+      date: post.publishDate?.toISOString(),
+      views: post.viewCount || 0,
+      trendingScore: post.trendingScore || 0,
+      image: post.coverImage || "/default-article.jpg",
+    }));
+  } catch (err) {
+    console.error("getPopularPostsByCategory error:", err);
+    return [];
+  }
+}
+
+/* --------------------------------------------------
+   3️⃣  Get trending posts within a category
+-------------------------------------------------- */
+export async function getTrendingPostsByCategory(slug, limit = 5) {
+  try {
+    const where = {
+      published: true,
+      status: "PUBLISHED",
+      trendingScore: { gt: 0 }, // Only posts with some trending activity
+      lastViewedAt: { gte: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) }, // Last 3 days
+    };
+
+    if (slug && slug !== "all") {
+      where.categories = { some: { slug } };
+    }
+
+    const posts = await prisma.post.findMany({
+      where,
+      orderBy: [{ trendingScore: "desc" }, { viewCount: "desc" }],
+      take: limit,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        excerpt: true,
+        coverImage: true,
+        publishDate: true,
+        viewCount: true,
+        trendingScore: true,
+        categories: { select: { slug: true, name: true } },
+        author: { select: { name: true } },
+      },
+    });
+
+    return posts.map((post) => ({
+      id: post.id,
+      slug: post.slug,
+      title: post.title,
+      excerpt: post.excerpt,
+      category: post.categories[0]?.slug || "all",
+      categoryName: post.categories[0]?.name || "General",
+      author: { name: post.author.name || "Anonymous" },
+      date: post.publishDate?.toISOString(),
+      views: post.viewCount || 0,
+      trendingScore: post.trendingScore || 0,
+      image: post.coverImage || "/default-article.jpg",
+    }));
+  } catch (err) {
+    console.error("getTrendingPostsByCategory error:", err);
+    return [];
+  }
+}
+
+/* --------------------------------------------------
+   4️⃣  Get all categories (without breaking)
 -------------------------------------------------- */
 export async function getAllCategories() {
   try {
     const categories = await prisma.category.findMany({
-      select: { id: true, slug: true, name: true, _count: { select: { posts: true } } },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        _count: { select: { posts: true } },
+      },
       orderBy: { name: "asc" },
     });
 
@@ -92,41 +225,7 @@ export async function getAllCategories() {
 }
 
 /* --------------------------------------------------
-   3️⃣  Trending posts
--------------------------------------------------- */
-export async function getTrendingPosts(limit = 5) {
-  try {
-    const posts = await prisma.post.findMany({
-      where: {
-        published: true,
-        status: "PUBLISHED",
-        publishDate: { lte: new Date() },
-      },
-      orderBy: [{ createdAt: "desc" }],
-      take: limit,
-      select: {
-        id: true,
-        title: true,
-        createdAt: true,
-        categories: { select: { slug: true } },
-      },
-    });
-
-    return posts.map((p) => ({
-      id: p.id,
-      title: p.title,
-      category: p.categories[0]?.slug || "all",
-      views: 0,
-      date: p.createdAt.toISOString(),
-    }));
-  } catch (err) {
-    console.error("getTrendingPosts error:", err);
-    return [];
-  }
-}
-
-/* --------------------------------------------------
-   Helpers
+   Helpers (unchanged)
 -------------------------------------------------- */
 function countWordsFromContent(content) {
   if (!content) return 0;
