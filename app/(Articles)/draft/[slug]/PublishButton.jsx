@@ -1,38 +1,3 @@
-// "use client";
-
-// import { useState } from "react";
-// import { useRouter } from "next/navigation";
-// import { publishPost } from "@/app/actions/publishPost";
-
-// export default function PublishButton({ post }) {
-//   const [publishing, setPublishing] = useState(false);
-//   const router = useRouter();
-
-//   const handlePublishSinglePost = async () => {
-//     try {
-//       setPublishing(true);
-//       const data = await publishPost(post.id);
-//       alert(`Published post: ${data.title}`);
-//       router.push("/Blogs");
-//     } catch (error) {
-//       console.error("Publish error:", error);
-//       alert("Error publishing post.");
-//     } finally {
-//       setPublishing(false);
-//     }
-//   };
-
-//   return (
-//     <button
-//       onClick={handlePublishSinglePost}
-//       className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium"
-//       disabled={publishing}
-//     >
-//       {publishing ? "Publishing..." : "Publish"}
-//     </button>
-//   );
-// }
-
 "use client";
 
 import { useState } from "react";
@@ -55,7 +20,7 @@ export default function PublishButton({ post }) {
 
       // Use a more user-friendly notification
       setTimeout(() => {
-        router.push("/Blogs");
+        router.push("/My-blogs");
       }, 1500);
     } catch (error) {
       console.error("Publish error:", error);

@@ -212,6 +212,8 @@ export default function EnhancedCreatePostPage() {
     if (selectedCategories.length === 0)
       errs.categories = "Pick at least one category";
     if (status === "SCHEDULED" && !publishDate) errs.publishDate = "Set a date";
+    if (selectedCategories.length === 0)
+      errs.categories = "Pick at least one category";
     if (coverImageFile && coverImageFile.size > 5 * 1024 * 1024)
       errs.coverImage = "Image must be ≤ 5 MB";
     setValidationErrors(errs);
@@ -220,14 +222,28 @@ export default function EnhancedCreatePostPage() {
 
   /* ---------- Submit / Draft ---------- */
   const handleSaveDraft = () => {
-    if (!validate()) return toast.error("Fix errors before saving");
+    if (!validate()) {
+      const firstErrorName = Object.keys(validationErrors)[0];
+      if (firstErrorName) {
+        document
+          .querySelector(`[name="${firstErrorName}"]`)
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      toast.error("Fix errors before saving");
+      return false; // <-- stop further processing
+    }
+
     setIsSubmitting(true);
     submitForm("DRAFT");
   };
 
   const handleSubmit = (action) => {
     console.log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
-    if (!validate()) return;
+
+    if (!validate()) {
+      toast.error("Fix errors before publishing");
+      return false; // <-- same here
+    }
     setIsSubmitting(true);
     submitForm(action);
   };
@@ -372,53 +388,65 @@ export default function EnhancedCreatePostPage() {
 
           {activeTab === "content" && (
             <div className="space-y-6">
-              <input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Post title..."
-                className={`w-full text-2xl font-bold p-3 rounded-lg border ${
-                  validationErrors.title ? "border-red-500" : "border-gray-300"
-                } focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white`}
-              />
-              {validationErrors.title && (
-                <Error>{validationErrors.title}</Error>
-              )}
+              <div>
+                <input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Post title..."
+                  className={`w-full text-2xl font-bold p-3 rounded-lg border ${
+                    validationErrors.title
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  } focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white`}
+                />
+                {validationErrors.title && (
+                  <Error>{validationErrors.title}</Error>
+                )}
+              </div>
 
-              <input
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-                placeholder="url-slug"
-                className={`w-full p-3 rounded-lg border ${
-                  validationErrors.slug ? "border-red-500" : "border-gray-300"
-                } focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white`}
-              />
-              {validationErrors.slug && <Error>{validationErrors.slug}</Error>}
+              <div>
+                <input
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                  placeholder="url-slug"
+                  className={`w-full p-3 rounded-lg border ${
+                    validationErrors.slug ? "border-red-500" : "border-gray-300"
+                  } focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white`}
+                />
+                {validationErrors.slug && (
+                  <Error>{validationErrors.slug}</Error>
+                )}
+              </div>
 
-              <TiptapEditor
-                content={content}
-                onChange={setContent}
-                placeholder="Start writing..."
-                className="min-h-[400px] bg-white rounded-lg border border-gray-300"
-              />
-              {validationErrors.content && (
-                <Error>{validationErrors.content}</Error>
-              )}
+              <div>
+                <TiptapEditor
+                  content={content}
+                  onChange={setContent}
+                  placeholder="Start writing..."
+                  className="min-h-[400px] bg-white rounded-lg border border-gray-300"
+                />
+                {validationErrors.content && (
+                  <Error>{validationErrors.content}</Error>
+                )}
+              </div>
 
-              <textarea
-                value={excerpt}
-                onChange={(e) => setExcerpt(e.target.value)}
-                placeholder="Excerpt (max 300 chars)"
-                maxLength={300}
-                className={`w-full p-3 rounded-lg border ${
-                  validationErrors.excerpt
-                    ? "border-red-500"
-                    : "border-gray-300"
-                } focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white`}
-                rows={4}
-              />
-              {validationErrors.excerpt && (
-                <Error>{validationErrors.excerpt}</Error>
-              )}
+              <div>
+                <textarea
+                  value={excerpt}
+                  onChange={(e) => setExcerpt(e.target.value)}
+                  placeholder="Excerpt (max 300 chars)"
+                  maxLength={300}
+                  className={`w-full p-3 rounded-lg border ${
+                    validationErrors.excerpt
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  } focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white`}
+                  rows={4}
+                />
+                {validationErrors.excerpt && (
+                  <Error>{validationErrors.excerpt}</Error>
+                )}
+              </div>
             </div>
           )}
 
@@ -457,10 +485,10 @@ export default function EnhancedCreatePostPage() {
                     className="bg-orange-600 h-2 rounded-full"
                     style={{ width: `${coverProgress}%` }}
                   ></div>
+                  {validationErrors.coverImage && (
+                    <Error>{validationErrors.coverImage}</Error>
+                  )}
                 </div>
-              )}
-              {validationErrors.coverImage && (
-                <Error>{validationErrors.coverImage}</Error>
               )}
 
               <input
@@ -518,6 +546,9 @@ export default function EnhancedCreatePostPage() {
                     onChange={(e) => setPublishDate(e.target.value)}
                     className="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white"
                   />
+                  {validationErrors.publishDate && (
+                    <Error>{validationErrors.publishDate}</Error>
+                  )}
                 </div>
               )}
             </div>
@@ -720,8 +751,9 @@ export default function EnhancedCreatePostPage() {
             }
             breaking={breaking}
             setBreaking={setBreaking}
+            // NEW
+            validationErrors={validationErrors}
           />
-
           {/* Tags */}
           <TagManager
             tags={tags}
@@ -854,12 +886,12 @@ function CategoryList({
   onToggle,
   breaking,
   setBreaking,
+  validationErrors, // <-- NEW
 }) {
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border">
       <h3 className="font-semibold mb-2">Categories</h3>
 
-      {/* Existing category checkboxes */}
       <div className="space-y-1 text-sm mb-4">
         {categories.map((c) => (
           <label key={c.id} className="flex items-center gap-2 cursor-pointer">
@@ -874,7 +906,10 @@ function CategoryList({
         ))}
       </div>
 
-      {/* Add Breaking News toggle here */}
+      {validationErrors.categories && (
+        <Error className="mt-2">{validationErrors.categories}</Error>
+      )}
+
       <div className="pt-2 border-t border-gray-200">
         <label className="flex items-center gap-2 cursor-pointer text-red-600 font-medium">
           <input
@@ -890,8 +925,6 @@ function CategoryList({
     </div>
   );
 }
-
-
 
 function TagManager({ tags, onAdd, onRemove, newTag, setNewTag }) {
   return (

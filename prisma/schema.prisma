@@ -20,89 +20,136 @@ enum Role {
 }
 
 model User {
-  id                      String               @id @default(cuid())
-  email                   String               @unique
+  id                      String    @id @default(cuid())
+  email                   String    @unique
   password                String
-   slug                   String                 @unique
+  slug                    String    @unique
   emailVerified           DateTime?
   name                    String?
+  role                    Role      @default(WRITER)
   verificationToken       String?
-  accounts                Account[]
-  role                    Role                 @default(WRITER)
   verificationTokenExpiry DateTime?
-  sessions                Session[]
-    posts                   Post[]             @relation("Posts")
-  PasswordResetToken      PasswordResetToken[]
 
+  /**
+   * auth back-references
+   */
+  accounts Account[]
+  sessions Session[]
+
+  /**
+   * posts & profile
+   */
+  posts              Post[]               @relation("Posts")
+  profile            UserProfile?
+  PasswordResetToken PasswordResetToken[]
+}
+
+model UserProfile {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+
+  headline        String? // “Senior Tech Correspondent”
+  bio             String? // markdown / html
+  avatar          String? // url
+  twitter         String?
+  linkedin        String?
+  github          String?
+  website         String?
+  phone           String?
+  location        String? // “Berlin, DE”
+  timezone        String? // “Europe/Berlin”
+  specialties     String[] // ["AI", "Climate"]
+  languages       String[] // ["en", "de"]
+  expertiseLevel  String   @default("intermediate") // beginner | intermediate | advanced | expert
+  verifiedBadge   Boolean  @default(false)
+  followersCount  Int      @default(0)
+  portfolioUrl    String?
+  resumeUrl       String?
+  newsletterOptIn Boolean  @default(false)
 }
 
 model Post {
-  id               String   @id @default(cuid())
-  title            String
-  slug             String   @unique
-  subtitle         String?
-  content          Json     // Tiptap JSON
-  excerpt          String?
-  published        Boolean  @default(false)
-  status           String   @default("DRAFT") // DRAFT | PUBLISHED | SCHEDULED
-  publishDate      DateTime? // when status === SCHEDULED
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  subtitle    String?
+  content     Json // Tiptap JSON
+  excerpt     String?
+  published   Boolean   @default(false)
+  status      String    @default("DRAFT") // DRAFT | PUBLISHED | SCHEDULED
+  publishDate DateTime? // when status === SCHEDULED
+   publishedAt DateTime?
 
-  /* Author(s) */
-  author   User   @relation("Posts", fields: [authorId], references: [id], onDelete: Cascade)
-  authorId String
+  /**
+   * Author(s)
+   */
+  author    User   @relation("Posts", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
   coAuthors Json? // array of user emails or IDs
 
-  /* Media */
+  /**
+   * Media
+   */
   coverImage String? // URL
   altText    String?
-  gallery    Json?   // array of URLs
+  gallery    Json? // array of URLs
   videoUrl   String?
   audioUrl   String?
 
-  /* Taxonomy */
+  /**
+   * Taxonomy
+   */
   categories Category[]
   tags       Tag[]
 
-  /* SEO */
-  metaTitle         String?
-  metaDescription   String?
-  focusKeyword      String?
-  canonicalUrl      String?
-  targetKeywords    Json? // string[]
-  ogTitle           String?
-  ogDescription     String?
-  ogImage           String?
-  twitterCard       String? @default("summary_large_image")
+  /**
+   * SEO
+   */
+  metaTitle       String?
+  metaDescription String?
+  focusKeyword    String?
+  canonicalUrl    String?
+  targetKeywords  Json? // string[]
+  ogTitle         String?
+  ogDescription   String?
+  ogImage         String?
+  twitterCard     String? @default("summary_large_image")
 
-  /* Advanced */
-  difficulty        String? @default("beginner") // beginner | intermediate | advanced
-  language          String? @default("en")
-  series            String?
-  seriesOrder       Int?    @default(1)
-  visibility        String? @default("public") // public | private | password-protected
-  password          String?
-  allowComments     Boolean @default(true)
-  allowSharing      Boolean @default(true)
-  featured          Boolean @default(false)
-  sticky            Boolean @default(false)
-   breaking      Boolean @default(false)
-  editorNotes       String?
-  customFields      Json?   // arbitrary key/value pairs
+  /**
+   * Advanced
+   */
+  difficulty    String? @default("beginner") // beginner | intermediate | advanced
+  language      String? @default("en")
+  series        String?
+  seriesOrder   Int?    @default(1)
+  visibility    String? @default("public") // public | private | password-protected
+  password      String?
+  allowComments Boolean @default(true)
+  allowSharing  Boolean @default(true)
+  featured      Boolean @default(false)
+  sticky        Boolean @default(false)
+  breaking      Boolean @default(false)
+  editorNotes   String?
+  customFields  Json? // arbitrary key/value pairs
+  viewCount      Int      @default(0)  // Total views counter
+  trendingScore  Float    @default(0)  // For sorting trending posts
+  lastViewedAt   DateTime?             // Last view timestamp
 
-  /* Timestamps */
+  /**
+   * Timestamps
+   */
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-
 model Category {
-  id    String @id @default(cuid())
-  name  String @unique
-  slug  String @unique
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
 
   posts Post[]
 }
-
 
 model Tag {
   id   String @id @default(cuid())
@@ -112,7 +159,6 @@ model Tag {
   posts Post[]
 }
 
-
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -120,7 +166,6 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
-
 
 model Account {
   id                String  @id @default(cuid())

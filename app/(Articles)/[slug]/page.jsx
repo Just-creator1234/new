@@ -1,8 +1,9 @@
-// app/articles/[slug]/page.js
-import { getArticlePage } from '@/app/actions/article';
-import ArticlePageClient from './ArticlePageClient'; // your client component
+// app/(Articles)/[slug]/page.jsx
+import { getArticlePage } from "@/app/actions/article";
+import ArticlePageClient from "./ArticlePageClient";
 
 export default async function ArticlePage({ params }) {
-  const data = await getArticlePage(params.slug);
+  const { slug } = await params;   // ← await here
+  const data = await getArticlePage(slug);
   return <ArticlePageClient article={data.post} relatedArticles={data.relatedArticles} />;
 }

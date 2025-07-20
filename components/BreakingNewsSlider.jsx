@@ -8,6 +8,7 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
+  ImageOff,
 } from "lucide-react";
 
 const BreakingNewsSlider = ({
@@ -19,11 +20,15 @@ const BreakingNewsSlider = ({
   // Remove the local currentSlide state since we're using the prop
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev === breakingNews.length - 1 ? 0 : prev + 1));
+    setCurrentIndex((prev) =>
+      prev === breakingNews.length - 1 ? 0 : prev + 1
+    );
   };
-  
+
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev === 0 ? breakingNews.length - 1 : prev - 1));
+    setCurrentIndex((prev) =>
+      prev === 0 ? breakingNews.length - 1 : prev - 1
+    );
   };
 
   // Auto-advance slides
@@ -44,20 +49,35 @@ const BreakingNewsSlider = ({
           <div
             key={news.id}
             className={`absolute inset-0 transition-opacity duration-500 ${
-              index === currentIndex  // Use currentIndex instead of currentSlide
+              index === currentIndex // Use currentIndex instead of currentSlide
                 ? "opacity-100"
                 : "opacity-0 pointer-events-none"
             }`}
           >
             {/* Image with gradient overlay */}
-            <img
+            {/* <img
               src={news.coverImage}
               alt={news.title}
               className="w-full h-full object-cover"
               onError={(e) => {
-                (e.target).src = '/default-news.jpg';
+                e.target.src = "/default-news.jpg";
               }}
-            />
+            /> */}
+
+            {news.coverImage ? (
+              <img
+                src={news.coverImage}
+                alt={news.title}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src = "/default-news.jpg";
+                }}
+              />
+            ) : (
+              <div className="w-full h-96 flex items-center justify-center border border-dashed border-gray-300 bg-gray-50">
+                <ImageOff className="w-10 h-10 text-gray-400" />
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
 
             {/* Breaking news badge */}
@@ -76,7 +96,7 @@ const BreakingNewsSlider = ({
                   {getTimeAgo(news.createdAt)}
                 </span>
                 <span className="text-sm text-gray-200">
-                  {news.views || "0"} views
+                  {news.viewCount || "0"} views
                 </span>
               </div>
 
@@ -136,9 +156,9 @@ const BreakingNewsSlider = ({
           {breakingNews.map((_, index) => (
             <button
               key={index}
-              onClick={() => setCurrentIndex(index)}  // Use setCurrentIndex
+              onClick={() => setCurrentIndex(index)} // Use setCurrentIndex
               className={`h-2 w-2 rounded-full transition ${
-                index === currentIndex  // Use currentIndex
+                index === currentIndex // Use currentIndex
                   ? "bg-white w-4"
                   : "bg-white/50"
               }`}

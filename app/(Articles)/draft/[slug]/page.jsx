@@ -98,7 +98,7 @@ export default async function DraftPostPage({ params }) {
 
           {/* Title and Excerpt */}
           <div className="space-y-6">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight tracking-tight break-words">
               {post.title}
             </h1>
 

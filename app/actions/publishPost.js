@@ -19,6 +19,7 @@ export async function publishPost(id) {
     where: { id },
     data: {
       status: "PUBLISHED",
+      published: true,
       publishedAt: new Date(),
     },
   });
