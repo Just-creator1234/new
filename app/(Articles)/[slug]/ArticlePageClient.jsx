@@ -1,264 +1,7 @@
-// "use client";
-// import React from "react";
-// import ViewTracker from "@/components/ViewTracker";
-// import {
-//   Search,
-//   ArrowRight,
-//   User,
-//   Clock,
-//   Share2,
-//   Heart,
-//   MessageCircle,
-//   Menu,
-//   Bell,
-//   Globe,
-//   Bookmark,
-//   Eye,
-//   ThumbsUp,
-//   Calendar,
-//   Award,
-//   ExternalLink,
-// } from "lucide-react";
-
-// const ArticlePageClient = ({ article, relatedArticles }) => {
-//   const CategoryTag = ({ type, children }) => {
-//     const categoryClasses = {
-//       breaking: "bg-red-50 text-red-600 border-red-200",
-//       politics: "bg-blue-50 text-blue-600 border-blue-200",
-//       tech: "bg-purple-50 text-purple-600 border-purple-200",
-//       sports: "bg-green-50 text-green-600 border-green-200",
-//       business: "bg-yellow-50 text-yellow-600 border-yellow-200",
-//       world: "bg-gray-50 text-gray-600 border-gray-200",
-//     };
-
-//     return (
-//       <span
-//         className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium border ${categoryClasses[type]}`}
-//       >
-//         {children}
-//       </span>
-//     );
-//   };
-
-//   const formatDate = (dateString) => {
-//     const date = new Date(dateString);
-//     return date.toLocaleDateString("en-US", {
-//       year: "numeric",
-//       month: "long",
-//       day: "numeric",
-//       hour: "2-digit",
-//       minute: "2-digit",
-//     });
-//   };
-
-//   if (!article) return null;
-
-//   return (
-//     <div className="min-h-screen bg-gray-50">
-//       <ViewTracker postId={article.id} />
-//       {/* Header */}
-
-//       {/* Main Content */}
-//       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-//         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-//           <article className="lg:col-span-2 bg-white rounded-xl shadow-sm overflow-hidden">
-//             {/* Article Header */}
-//             <div className="p-6">
-//               <div className="flex items-center space-x-4 mb-4">
-//                 <CategoryTag type={article.category}>
-//                   {article.category.toUpperCase()}
-//                 </CategoryTag>
-//                 <div className="flex items-center text-sm text-gray-500">
-//                   <Clock className="h-4 w-4 mr-1" />
-//                   <span>{formatDate(article.publishedAt)}</span>
-//                 </div>
-//                 <div className="flex items-center text-sm text-gray-500">
-//                   <Eye className="h-4 w-4 mr-1" />
-//                   <span>{article.views}</span>
-//                 </div>
-//               </div>
-
-//               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-//                 {article.title}
-//               </h1>
-
-//               <div className="flex items-center justify-between mb-8">
-//                 <div className="flex items-center space-x-2">
-//                   <button className="p-2 text-gray-400 hover:text-red-500 transition-colors">
-//                     <Heart className="h-5 w-5" />
-//                   </button>
-//                   <button className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
-//                     <Bookmark className="h-5 w-5" />
-//                   </button>
-//                   <button className="p-2 text-gray-400 hover:text-green-500 transition-colors">
-//                     <Share2 className="h-5 w-5" />
-//                   </button>
-//                 </div>
-//               </div>
-//             </div>
-
-//             <div className="w-full h-64 md:h-96 bg-gray-200 relative">
-//               {article.coverImage && (
-//                 <img
-//                   src={article.coverImage}
-//                   alt={article.altText || article.title}
-//                   className="w-full h-full object-cover"
-//                 />
-//               )}
-//               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-//             </div>
-
-//             <div className="p-6">
-//               <div
-//                 className="prose max-w-none"
-//                 dangerouslySetInnerHTML={{
-//                   __html: article.content?.html || article.content,
-//                 }}
-//               />
-
-//               <div className="mt-12 pt-6 border-t border-gray-200">
-//                 <div className="flex items-center justify-between">
-//                   <div className="flex items-center space-x-4">
-//                     <button className="flex items-center space-x-1 text-gray-500 hover:text-blue-600">
-//                       <ThumbsUp className="h-5 w-5" />
-//                       <span>{article.likes} Likes</span>
-//                     </button>
-//                   </div>
-//                   <div className="text-sm text-gray-500">
-//                     {article.readTime}
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-//           </article>
-
-//           {/* Sidebar */}
-//           <aside className="space-y-6">
-//             <div className="bg-white rounded-lg shadow-sm">
-//               <div className="bg-gradient-to-r from-blue-50 to-purple-50 px-6 py-4">
-//                 <h3 className="text-lg font-semibold">About the Author</h3>
-//               </div>
-
-//               <div className="p-6">
-//                 <div className="flex gap-4 mb-6">
-//                   <div className="bg-gradient-to-br from-blue-400 to-purple-500 rounded-full w-16 h-16 flex items-center justify-center">
-//                     <User className="text-white h-7 w-7" />
-//                   </div>
-//                   <div>
-//                     <h4 className="text-lg font-semibold mb-1">
-//                       {article.author.name}
-//                     </h4>
-//                     <p className="text-sm text-gray-600">
-//                       {article.author.bio}
-//                     </p>
-//                   </div>
-//                 </div>
-
-//                 <div className="grid grid-cols-2 gap-4 mb-6">
-//                   <div className="bg-gray-50 p-3 rounded-lg text-center">
-//                     <div className="flex justify-center items-center mb-1">
-//                       <Calendar className="text-blue-600 h-4 w-4 mr-1" />
-//                       <span className="text-xs text-gray-500">JOINED</span>
-//                     </div>
-//                     <p className="text-sm font-semibold">2019</p>
-//                   </div>
-//                   <div className="bg-gray-50 p-3 rounded-lg text-center">
-//                     <div className="flex justify-center items-center mb-1">
-//                       <Award className="text-purple-600 h-4 w-4 mr-1" />
-//                       <span className="text-xs text-gray-500">ARTICLES</span>
-//                     </div>
-//                     <p className="text-sm font-semibold">250+</p>
-//                   </div>
-//                 </div>
-
-//                 <div className="mb-6">
-//                   <p className="text-xs text-gray-500 uppercase mb-3">
-//                     Expertise
-//                   </p>
-//                   <div className="flex flex-wrap gap-2">
-//                     {article.tags?.map((tag) => (
-//                       <span
-//                         key={tag.name}
-//                         className="bg-blue-100 text-blue-700 px-2.5 py-1 text-xs rounded-full"
-//                       >
-//                         {tag.name}
-//                       </span>
-//                     ))}
-//                   </div>
-//                 </div>
-
-//                 <div className="space-y-2">
-//                   <button className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg hover:bg-blue-700 text-sm font-medium flex justify-center items-center">
-//                     <User className="h-4 w-4 mr-2" />
-//                     Follow Author
-//                   </button>
-//                   <button className="w-full border border-gray-300 text-gray-700 py-2.5 px-4 rounded-lg hover:bg-gray-50 text-sm font-medium flex justify-center items-center">
-//                     <ExternalLink className="h-4 w-4 mr-2" />
-//                     View All Articles
-//                   </button>
-//                 </div>
-//               </div>
-//             </div>
-
-//             <div className="bg-white rounded-lg shadow-sm p-6">
-//               <h3 className="text-lg font-semibold mb-4">Related Articles</h3>
-//               <div className="space-y-4">
-//                 {relatedArticles?.map((item) => (
-//                   <div key={item.id} className="group">
-//                     <div className="flex space-x-3">
-//                       <div
-//                         className="flex-shrink-0 w-20 h-16 bg-gray-200 rounded-lg"
-//                         style={{
-//                           backgroundImage: `url(${item.imageUrl})`,
-//                           backgroundSize: "cover",
-//                           backgroundPosition: "center",
-//                         }}
-//                       />
-//                       <div>
-//                         <CategoryTag type={item.category}>
-//                           {item.category.toUpperCase()}
-//                         </CategoryTag>
-//                         <h4 className="text-sm font-medium text-gray-900 group-hover:text-blue-600 mt-1 line-clamp-2">
-//                           {item.title}
-//                         </h4>
-//                         <p className="text-xs text-gray-500 mt-1">
-//                           {item.readTime}
-//                         </p>
-//                       </div>
-//                     </div>
-//                   </div>
-//                 ))}
-//               </div>
-//             </div>
-
-//             <div className="bg-blue-50 rounded-lg shadow-sm p-6">
-//               <h3 className="text-lg font-semibold mb-2">Stay Updated</h3>
-//               <p className="text-sm text-gray-600 mb-4">
-//                 Get the latest tech news delivered to your inbox
-//               </p>
-//               <div className="space-y-3">
-//                 <input
-//                   type="email"
-//                   placeholder="Your email address"
-//                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-//                 />
-//                 <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 text-sm font-medium">
-//                   Subscribe
-//                 </button>
-//               </div>
-//             </div>
-//           </aside>
-//         </div>
-//       </main>
-//     </div>
-//   );
-// };
-
-// export default ArticlePageClient;
-
 "use client";
 import React, { useState } from "react";
 import ViewTracker from "@/components/ViewTracker";
+import Head from "next/head";
 import {
   Search,
   ArrowRight,
@@ -369,6 +112,74 @@ const ArticlePageClient = ({ article, relatedArticles }) => {
   return (
     <div className="min-h-screen bg-white">
       <ViewTracker postId={article.id} />
+      <Head>
+        {/* ---------- Core meta ---------- */}
+        <title>{article.title}</title>
+        <meta
+          name="description"
+          content={article.metaDescription || article.excerpt || ""}
+        />
+
+        {/* ---------- Open-Graph / Facebook ---------- */}
+        <meta property="og:title" content={article.ogTitle || article.title} />
+        <meta
+          property="og:description"
+          content={article.ogDescription || article.excerpt || ""}
+        />
+        <meta
+          property="og:image"
+          content={article.ogImage || article.coverImage || ""}
+        />
+        <meta property="og:type" content="article" />
+        <meta
+          property="og:url"
+          content={typeof window !== "undefined" ? window.location.href : ""}
+        />
+
+        {/* ---------- Twitter ---------- */}
+        <meta
+          name="twitter:card"
+          content={article.twitterCard || "summary_large_image"}
+        />
+        <meta name="twitter:title" content={article.ogTitle || article.title} />
+        <meta
+          name="twitter:description"
+          content={article.ogDescription || article.excerpt || ""}
+        />
+        <meta
+          name="twitter:image"
+          content={article.ogImage || article.coverImage || ""}
+        />
+
+        {/* ---------- Google News / Schema ---------- */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              url: "https://yoursite.com/logo.png",
+              headline: article.title,
+              description: article.metaDescription || article.excerpt,
+              image: article.coverImage,
+              datePublished: article.publishedAt,
+              dateModified: article.updatedAt || article.publishedAt,
+              author: {
+                "@type": "Person",
+                name: article.author?.name || "Staff Writer",
+              },
+              publisher: {
+                "@type": "Organization",
+                name: "YourNews", // ← change to your actual site name
+                logo: {
+                  "@type": "ImageObject",
+                  url: "https://yoursite.com/logo.png", // ← change to your logo URL
+                },
+              },
+              keywords: article.tags?.map((t) => t.name).join(", "),
+            }),
+          }}
+        />
+      </Head>
 
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">

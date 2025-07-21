@@ -1,21 +1,28 @@
 // app/api/upload/route.js
-import { writeFile } from "fs/promises";
-import { mkdir } from "fs/promises";
-import { join } from "path";
-import { randomUUID } from "crypto";
+import { NextResponse } from 'next/server';
+import { uploadFile } from '@/lib/upload';
 
-export async function POST(req) {
-  const formData = await req.formData();
-  const file = formData.get("image");
-  if (!file) return new Response("No file", { status: 400 });
+export async function POST(request) {
+  try {
+    const formData = await request.formData();
+    const file = formData.get('image');
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const filename = `${randomUUID()}-${file.name}`;
-  const dir = join(process.cwd(), "public/uploads");
-  const path = join(dir, filename);
+    if (!file) {
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+    }
 
-  +(await mkdir(dir, { recursive: true })); // ensures the folder exists
-  await writeFile(path, buffer);
+    const maxSize = 5_000_000; // 5 MB
+    if (file.size > maxSize) {
+      return NextResponse.json(
+        { error: 'File size exceeds 5 MB limit' },
+        { status: 413 }
+      );
+    }
 
-  return Response.json({ url: `/uploads/${filename}` });
+    const url = await uploadFile(file);
+    return NextResponse.json({ url });
+  } catch (error) {
+    console.error('Upload error:', error);
+    return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+  }
 }

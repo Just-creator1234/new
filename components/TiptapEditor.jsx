@@ -243,6 +243,8 @@ export default function TiptapEditor({
             line-height: 1.6;
             color: #374151;
             background-color: transparent;
+            max-width: 100%;
+            padding: 1rem clamp(1rem, 5vw, 4rem);
           }
 
           .dark .ProseMirror {
@@ -335,6 +337,8 @@ export default function TiptapEditor({
           }
 
           .ProseMirror img {
+            display: block;
+            margin: 1rem auto;
             max-width: 100%;
             height: auto;
             border-radius: 0.5rem;
