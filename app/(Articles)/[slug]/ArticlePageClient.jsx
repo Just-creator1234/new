@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import ViewTracker from "@/components/ViewTracker";
 import Head from "next/head";
+import { usePostLikes } from "@/hook/usePostLikes"; // new file below
+import NewsletterSignup from "@/components/NewsletterSignup";
 import {
   Search,
   ArrowRight,
@@ -36,10 +38,13 @@ import {
 
 const ArticlePageClient = ({ article, relatedArticles }) => {
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
-  const [likes, setLikes] = useState(article?.likes || 0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const { likes, isLiked, toggleLike } = usePostLikes({
+    slug: article.slug,
+    initialLikes: article.likes || 0,
+    initialLiked: article.initialLiked || false, // hydrate from server
+  });
 
   const CategoryTag = ({ type, children, size = "md" }) => {
     const categoryClasses = {
@@ -80,11 +85,6 @@ const ArticlePageClient = ({ article, relatedArticles }) => {
       day: "numeric",
       year: "numeric",
     });
-  };
-
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikes((prev) => (isLiked ? prev - 1 : prev + 1));
   };
 
   const handleShare = (platform) => {
@@ -257,7 +257,7 @@ const ArticlePageClient = ({ article, relatedArticles }) => {
                 <div className="flex items-center justify-between py-4">
                   <div className="flex items-center space-x-1">
                     <button
-                      onClick={handleLike}
+                      onClick={toggleLike}
                       className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all ${
                         isLiked
                           ? "bg-red-50 text-red-600 border border-red-200"
@@ -265,7 +265,11 @@ const ArticlePageClient = ({ article, relatedArticles }) => {
                       }`}
                     >
                       <Heart
-                        className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`}
+                        className={`h-4 w-4 transition-colors ${
+                          isLiked
+                            ? "fill-red-600 text-red-600"
+                            : "fill-none text-gray-400"
+                        }`}
                       />
                       <span className="text-sm font-medium">{likes}</span>
                     </button>
@@ -546,29 +550,7 @@ const ArticlePageClient = ({ article, relatedArticles }) => {
             )}
 
             {/* Newsletter Signup */}
-            <div className="bg-gradient-to-br from-blue-600 to-purple-700 rounded-2xl text-white overflow-hidden">
-              <div className="p-8">
-                <h3 className="text-xl font-bold mb-2">Stay Ahead</h3>
-                <p className="text-blue-100 mb-6 leading-relaxed">
-                  Get the latest tech insights and breaking news delivered to
-                  your inbox every morning.
-                </p>
-                <div className="space-y-3">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    className="w-full px-4 py-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 placeholder-white/70 text-white focus:ring-2 focus:ring-white/50 focus:border-white/50"
-                  />
-                  <button className="w-full bg-white text-blue-600 py-3 px-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors">
-                    Subscribe Free
-                  </button>
-                  <p className="text-xs text-blue-100 text-center">
-                    Join 50,000+ readers • Unsubscribe anytime
-                  </p>
-                </div>
-              </div>
-            </div>
-
+            <NewsletterSignup />
             {/* Back to Top */}
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}

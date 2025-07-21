@@ -142,7 +142,22 @@ model Post {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+model PostLike {
+  id        String   @id @default(cuid())
+  postSlug  String   // references Post.slug
+  visitorId String   // hashed cookie value
+  createdAt DateTime @default(now())
 
+  @@unique([postSlug, visitorId]) // one like per visitor per post
+}
+
+model NewsletterSubscription {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  verified  Boolean  @default(false)
+  token     String?  @unique   // optional, nullable
+  createdAt DateTime @default(now())
+}
 model Category {
   id   String @id @default(cuid())
   name String @unique
