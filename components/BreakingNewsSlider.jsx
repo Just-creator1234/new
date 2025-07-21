@@ -118,7 +118,7 @@ const BreakingNewsSlider = ({
 
                 <div className="flex items-center space-x-2">
                   <a
-                    href={`/news/${news.slug}`}
+                    href={`/${news.slug}`}
                     className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-full transition flex items-center"
                   >
                     Read full story <ArrowRight className="w-4 h-4 ml-2" />
