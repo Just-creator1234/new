@@ -1,12 +1,8 @@
 "use server";
 
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 export async function getAllPublishedPosts() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) throw new Error("Unauthorized");
   try {
     const posts = await prisma.post.findMany({
       where: {
@@ -62,20 +58,18 @@ export async function getTrendingPosts(limit = 5) {
   }
 }
 
-
-
 export async function getPopularPosts(limit = 5) {
   return await prisma.post.findMany({
     where: {
       published: true,
       // Only consider posts viewed in the last 7 days
-      lastViewedAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
+      lastViewedAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
     },
     orderBy: [
-      { trendingScore: 'desc' }, // Weighted score (see below)
-      { viewCount: 'desc' }      // Fallback to total views
+      { trendingScore: "desc" }, // Weighted score (see below)
+      { viewCount: "desc" }, // Fallback to total views
     ],
     take: limit,
-    include: { author: true, categories: true }
+    include: { author: true, categories: true },
   });
 }
