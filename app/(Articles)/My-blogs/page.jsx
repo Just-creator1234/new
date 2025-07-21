@@ -8,7 +8,7 @@ import { getPosts } from "@/app/actions/blogpost";
 import { publishPost } from "@/app/actions/publishPost";
 import BlogItem from "@/components/BlogItem";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 
 import {
   Eye,
@@ -40,7 +40,6 @@ export default function MyBlogsPage() {
   const [sortOrder, setSortOrder] = useState("desc");
   const [loading, setLoading] = useState(false);
   const [publishing, setPublishing] = useState(new Set());
-  const router = useRouter();
 
   /* ---------- fetch posts for logged-in writer ---------- */
   const fetchPosts = async () => {
@@ -164,7 +163,14 @@ export default function MyBlogsPage() {
 
   /* ---------- loading skeleton ---------- */
   if (!session) {
-    router.push("/");
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="w-12 h-12 mx-auto mb-4 bg-gray-200 rounded-full animate-pulse"></div>
+          <p className="text-gray-600 font-medium">Access denied</p>
+        </div>
+      </div>
+    );
   }
 
   const LoadingSkeleton = () => (
@@ -484,6 +490,7 @@ export default function MyBlogsPage() {
                         ? "flex items-center gap-6 p-6"
                         : "flex flex-col"
                     }`}
+                    
                   >
                     {/* Cover Image */}
                     {post.coverImage ? (
