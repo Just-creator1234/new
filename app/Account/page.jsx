@@ -1,6 +1,13 @@
 "use client";
-import React, { useState } from "react";
-import { updateUserProfile, changePassword } from "@/app/actions/manageAccount";
+
+import React, { useState, useEffect } from "react";
+import {
+  updateUserProfile,
+  changePassword,
+  getUser,
+  sendChangeEmailVerification,
+  deleteAccount,
+} from "@/app/actions/manageAccount";
 import {
   User,
   Mail,
@@ -11,89 +18,103 @@ import {
   Globe,
   ArrowRight,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 
-const ManageAccountPage = () => {
-  const { data: session, update } = useSession();
-  const user = session?.user;
+export default function ManageAccountPage() {
+  // ------------------ state ------------------
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [slug, setSlug] = useState("");
+  const [currentEmail, setCurrentEmail] = useState(""); // latest from DB
 
-  // Form states
-  const [name, setName] = useState(user?.name || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [slug, setSlug] = useState(user?.slug || "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // Edit modes
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isEditingSlug, setIsEditingSlug] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
 
-  // Loading states
-  const [isUpdating, setIsUpdating] = useState(false);
+  // ------------------ load fresh data once ------------------
+  useEffect(() => {
+    (async () => {
+      const fresh = await getUser();
+      if (fresh) {
+        setName(fresh.name ?? "");
+        setEmail(fresh.email ?? "");
+        setSlug(fresh.slug ?? "");
+        setCurrentEmail(fresh.email ?? ""); // authoritative e-mail
+      }
+    })();
+  }, []);
 
+  // ------------------ handlers ------------------
   const handleUpdateProfile = async () => {
     setIsUpdating(true);
     setError(null);
     setSuccess(null);
-
     const formData = new FormData();
     formData.append("name", name);
-    formData.append("email", email);
     formData.append("slug", slug);
 
-    const result = await updateUserProfile(formData);
-
-    if (result.error) {
-      setError(result.error);
-      // Revert changes if error
-      setName(user?.name || "");
-      setEmail(user?.email || "");
-      setSlug(user?.slug || "");
+    const res = await updateUserProfile(formData);
+    if (res.error) {
+      setError(res.error);
+      // revert only these two fields
+      const fresh = await getUser();
+      if (fresh) {
+        setName(fresh.name ?? "");
+        setSlug(fresh.slug ?? "");
+      }
     } else {
+      const fresh = await getUser();
+      if (fresh) {
+        setName(fresh.name ?? "");
+        setSlug(fresh.slug ?? "");
+        setEmail(fresh.email ?? ""); // keeps old value if still pending
+      }
       setSuccess("Profile updated successfully!");
-      // Update the session
-      await update({
-        ...session,
-        user: {
-          ...session?.user,
-          name,
-          email,
-          slug,
-        },
-      });
       setIsEditingName(false);
-      setIsEditingEmail(false);
       setIsEditingSlug(false);
     }
-
     setIsUpdating(false);
+  };
+
+  const handleSendEmailVerification = async () => {
+    setIsUpdating(true);
+    setError(null);
+    setSuccess(null);
+    const { error } = await sendChangeEmailVerification(email);
+    setIsUpdating(false);
+    if (error) setError(error);
+    else {
+      setSuccess("A verification link has been sent to your new address.");
+      setIsEditingEmail(false);
+    }
   };
 
   const handleChangePassword = async () => {
     setIsUpdating(true);
     setError(null);
     setSuccess(null);
-
     const formData = new FormData();
     formData.append("currentPassword", currentPassword);
     formData.append("newPassword", newPassword);
     formData.append("confirmPassword", confirmPassword);
 
-    const result = await changePassword(formData);
-
-    if (result.error) {
-      setError(result.error);
-    } else {
+    const res = await changePassword(formData);
+    if (res.error) setError(res.error);
+    else {
       setSuccess("Password changed successfully!");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
       setIsEditingPassword(false);
     }
-
     setIsUpdating(false);
   };
 
@@ -104,13 +125,25 @@ const ManageAccountPage = () => {
           <h1 className="text-3xl font-bold text-neutral-900 mb-2">
             Account Settings
           </h1>
-          <p className="text-neutral-600">
+          <p className="text-lg text-neutral-600">
             Manage your writer profile and account details
           </p>
         </div>
 
+        {/* Success/Error Messages */}
+        {success && (
+          <div className="mb-6 p-4 bg-success-100 text-success-700 rounded-lg border border-success-200">
+            {success}
+          </div>
+        )}
+        {error && (
+          <div className="mb-6 p-4 bg-error-100 text-error-700 rounded-lg border border-error-200">
+            {error}
+          </div>
+        )}
+
         {/* Profile Card */}
-        <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 mb-8 overflow-hidden">
+        <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 mb-8 overflow-hidden">
           <div className="px-6 py-5 border-b border-neutral-200">
             <h2 className="text-xl font-semibold text-neutral-900">
               Profile Information
@@ -133,7 +166,7 @@ const ManageAccountPage = () => {
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="pl-10 w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="pl-10 w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         placeholder="Your full name"
                       />
                     </div>
@@ -149,7 +182,7 @@ const ManageAccountPage = () => {
                     <button
                       onClick={handleUpdateProfile}
                       disabled={isUpdating}
-                      className="ml-2 p-2 text-blue-600 hover:text-blue-800"
+                      className="ml-2 p-2 text-primary-600 hover:text-primary-800"
                     >
                       <Check className="h-5 w-5" />
                     </button>
@@ -187,26 +220,48 @@ const ManageAccountPage = () => {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="pl-10 w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="pl-10 w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         placeholder="Your email address"
                       />
                     </div>
+
+                    {/* Cancel */}
                     <button
                       onClick={() => {
                         setIsEditingEmail(false);
-                        setEmail(user?.email || "");
+                        setEmail(currentEmail); // ← revert to the DB value
                       }}
                       className="ml-2 p-2 text-neutral-500 hover:text-neutral-700"
                     >
                       <X className="h-5 w-5" />
                     </button>
-                    <button
-                      onClick={handleUpdateProfile}
-                      disabled={isUpdating}
-                      className="ml-2 p-2 text-blue-600 hover:text-blue-800"
-                    >
-                      <Check className="h-5 w-5" />
-                    </button>
+
+                    {/* Send verification (only when changed) */}
+                    {email !== currentEmail && (
+                      <button
+                        onClick={async () => {
+                          setIsUpdating(true);
+                          setError(null);
+                          setSuccess(null);
+                          const { error } = await sendChangeEmailVerification(
+                            email
+                          );
+                          setIsUpdating(false);
+                          if (error) {
+                            setError(error);
+                          } else {
+                            setSuccess(
+                              "Check your inbox for a confirmation link."
+                            );
+                            setIsEditingEmail(false);
+                          }
+                        }}
+                        disabled={isUpdating}
+                        className="ml-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+                      >
+                        {isUpdating ? "Sending…" : "Verify"}
+                      </button>
+                    )}
                   </>
                 ) : (
                   <>
@@ -237,7 +292,7 @@ const ManageAccountPage = () => {
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Globe className="h-5 w-5 text-neutral-400" />
                       </div>
-                      <div className="absolute inset-y-0 left-0 pl-10 flex items-center pointer-events-none">
+                      <div className="absolute inset-y-0 left-10 flex items-center pointer-events-none">
                         <span className="text-neutral-500">
                           speedynews.com/writer/
                         </span>
@@ -246,7 +301,7 @@ const ManageAccountPage = () => {
                         type="text"
                         value={slug}
                         onChange={(e) => setSlug(e.target.value)}
-                        className="pl-48 w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="pl-48 w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         placeholder="your-username"
                       />
                     </div>
@@ -262,7 +317,7 @@ const ManageAccountPage = () => {
                     <button
                       onClick={handleUpdateProfile}
                       disabled={isUpdating}
-                      className="ml-2 p-2 text-blue-600 hover:text-blue-800"
+                      className="ml-2 p-2 text-primary-600 hover:text-primary-800"
                     >
                       <Check className="h-5 w-5" />
                     </button>
@@ -272,7 +327,7 @@ const ManageAccountPage = () => {
                     <div className="flex items-center flex-1">
                       <Globe className="h-5 w-5 text-neutral-400 mr-3" />
                       <span className="text-neutral-900">
-                        speedynews.com/writer/{slug}
+                        speedynews.com/writer/ {slug}
                       </span>
                     </div>
                     <button
@@ -289,7 +344,7 @@ const ManageAccountPage = () => {
         </div>
 
         {/* Password Card */}
-        <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 mb-8 overflow-hidden">
+        <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 mb-8 overflow-hidden">
           <div className="px-6 py-5 border-b border-neutral-200">
             <h2 className="text-xl font-semibold text-neutral-900">
               Change Password
@@ -310,7 +365,7 @@ const ManageAccountPage = () => {
                       type="password"
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
-                      className="pl-10 w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="pl-10 w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       placeholder="Enter current password"
                     />
                   </div>
@@ -327,7 +382,7 @@ const ManageAccountPage = () => {
                       type="password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="pl-10 w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="pl-10 w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       placeholder="Enter new password"
                     />
                   </div>
@@ -344,7 +399,7 @@ const ManageAccountPage = () => {
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="pl-10 w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="pl-10 w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       placeholder="Confirm new password"
                     />
                   </div>
@@ -360,7 +415,7 @@ const ManageAccountPage = () => {
                   <button
                     onClick={handleChangePassword}
                     disabled={isUpdating}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 flex items-center"
                   >
                     {isUpdating ? (
                       "Updating..."
@@ -384,34 +439,20 @@ const ManageAccountPage = () => {
         </div>
 
         {/* Account Actions */}
-        <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
-          <div className="px-6 py-5 border-b border-neutral-200">
-            <h2 className="text-xl font-semibold text-neutral-900">
-              Account Actions
-            </h2>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              <button className="w-full text-left px-4 py-3 border border-neutral-200 rounded-lg hover:bg-neutral-50 flex justify-between items-center">
-                <span className="text-neutral-700">Download your data</span>
-                <ArrowRight className="h-4 w-4 text-neutral-500" />
-              </button>
-              <button className="w-full text-left px-4 py-3 border border-neutral-200 rounded-lg hover:bg-neutral-50 flex justify-between items-center">
-                <span className="text-neutral-700">
-                  Request verification badge
-                </span>
-                <ArrowRight className="h-4 w-4 text-neutral-500" />
-              </button>
-              <button className="w-full text-left px-4 py-3 border border-red-200 rounded-lg hover:bg-red-50 flex justify-between items-center text-red-600">
-                <span>Delete account</span>
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+        <button
+          className="w-full text-left px-4 py-3 border border-error-200 rounded-lg hover:bg-error-50 flex justify-between items-center text-error-600"
+          onClick={async () => {
+            if (window.confirm("Are you sure? This action CANNOT be undone.")) {
+              const res = await deleteAccount();
+              if (res.error) alert(res.error);
+              else location.href = "/"; // or sign-out page
+            }
+          }}
+        >
+          <span>Delete account</span>
+          <ArrowRight className="h-4 w-4" />
+        </button>
       </div>
     </div>
   );
-};
-
-export default ManageAccountPage;
+}
