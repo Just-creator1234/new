@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import { ToasterProvider } from "@/components/ToasterProvider";
 export default async function PostsLayout({ children }) {
   return (
-    <div>
+    <div className="relative">
       <Navbar />
       <main>
         {children}

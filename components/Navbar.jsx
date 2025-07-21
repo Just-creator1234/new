@@ -1,241 +1,3 @@
-// "use client";
-
-// import { useState, useRef, useEffect } from "react";
-// import { useRouter } from "next/navigation";
-// import { signOut, useSession } from "next-auth/react";
-// import {
-//   Search,
-//   User,
-//   Menu,
-//   Bell,
-//   Newspaper,
-//   Settings,
-//   LogOut,
-//   ChevronDown,
-//   X,
-// } from "lucide-react";
-
-// const DropdownItem = ({ icon, label, onClick }) => (
-//   <button
-//     onClick={onClick}
-//     className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-//   >
-//     {icon}
-//     <span>{label}</span>
-//   </button>
-// );
-
-// export default function Navbar() {
-//   const [open, setOpen] = useState(false);
-//   const [searchOpen, setSearchOpen] = useState(false);
-//   const [query, setQuery] = useState("");
-//   const [results, setResults] = useState({
-//     posts: [],
-//     writers: [],
-//     categories: [],
-//   });
-//   const [loading, setLoading] = useState(false);
-
-//   const menuRef = useRef(null);
-//   const searchRef = useRef(null);
-//   const router = useRouter();
-//   const { data: session, status } = useSession();
-
-//   // Close dropdowns on outside click
-//   useEffect(() => {
-//     const outside = (e) => {
-//       if (menuRef.current && !menuRef.current.contains(e.target))
-//         setOpen(false);
-//       if (searchRef.current && !searchRef.current.contains(e.target))
-//         setSearchOpen(false);
-//     };
-//     document.addEventListener("mousedown", outside);
-//     return () => document.removeEventListener("mousedown", outside);
-//   }, []);
-
-//   // Debounced search
-//   useEffect(() => {
-//     if (!query.trim()) {
-//       setResults({ posts: [], writers: [], categories: [] });
-//       return;
-//     }
-//     const id = setTimeout(async () => {
-//       setLoading(true);
-//       const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-//       const data = await res.json();
-//       setResults(data);
-//       setLoading(false);
-//     }, 300);
-//     return () => clearTimeout(id);
-//   }, [query]);
-
-//   const showWriterMenu = status === "authenticated" && session?.user?.role;
-
-//   return (
-//     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-//         <div className="flex items-center justify-between h-16">
-//           <h1
-//             className="text-xl font-bold text-blue-600 cursor-pointer"
-//             onClick={() => router.push("/")}
-//           >
-//             SpeedyNews
-//           </h1>
-
-//           {/* SEARCH BAR */}
-//           <div className="relative hidden md:block" ref={searchRef}>
-//             <div className="flex items-center space-x-2">
-//               {searchOpen ? (
-//                 <>
-//                   <input
-//                     type="text"
-//                     value={query}
-//                     onChange={(e) => setQuery(e.target.value)}
-//                     placeholder="Search posts, writers, tags…"
-//                     className="w-64 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
-//                   />
-//                   <button
-//                     onClick={() => {
-//                       setSearchOpen(false);
-//                       setQuery("");
-//                       setResults({ posts: [], writers: [], categories: [] });
-//                     }}
-//                   >
-//                     <X className="h-4 w-4 text-gray-500" />
-//                   </button>
-//                 </>
-//               ) : (
-//                 <button onClick={() => setSearchOpen(true)}>
-//                   <Search className="h-5 w-5 text-gray-500" />
-//                 </button>
-//               )}
-//             </div>
-
-//             {/* SEARCH RESULTS DROPDOWN */}
-//             {searchOpen && query && (
-//               <div className="absolute top-full mt-1 w-72 max-h-96 overflow-y-auto bg-white border rounded shadow-lg z-50">
-//                 {loading ? (
-//                   <div className="p-2 text-sm text-gray-500">Searching…</div>
-//                 ) : (
-//                   <>
-//                     {results.posts.length > 0 && (
-//                       <>
-//                         <div className="px-2 py-1 text-xs font-semibold text-gray-500 border-b">
-//                           Posts
-//                         </div>
-//                         {results.posts.map((p) => (
-//                           <button
-//                             key={p.id}
-//                             onClick={() => router.push(`/${p.slug}`)}
-//                             className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100"
-//                           >
-//                             {p.title}
-//                           </button>
-//                         ))}
-//                       </>
-//                     )}
-
-//                     {results.writers.length > 0 && (
-//                       <>
-//                         <div className="px-2 py-1 text-xs font-semibold text-gray-500 border-b">
-//                           Writers
-//                         </div>
-//                         {results.writers.map((w) => (
-//                           <button
-//                             key={w.id}
-//                             onClick={() => router.push(`/Authors/${w.slug}`)}
-//                             className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100"
-//                           >
-//                             {w.name}
-//                           </button>
-//                         ))}
-//                       </>
-//                     )}
-
-//                     {results.categories.length > 0 && (
-//                       <>
-//                         <div className="px-2 py-1 text-xs font-semibold text-gray-500 border-b">
-//                           Category
-//                         </div>
-//                         {results.categories.map((c) => (
-//                           <button
-//                             key={c.id}
-//                             onClick={() => router.push(`/Categories/${c.slug}`)}
-//                             className="block w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100"
-//                           >
-//                             {c.name}
-//                           </button>
-//                         ))}
-//                       </>
-//                     )}
-
-//                     {!results.posts.length &&
-//                       !results.writers.length &&
-//                       !results.categories.length && (
-//                         <div className="p-2 text-sm text-gray-500">
-//                           No results
-//                         </div>
-//                       )}
-//                   </>
-//                 )}
-//               </div>
-//             )}
-//           </div>
-
-//           {/* ACCOUNT DROPDOWN */}
-//           <div className="flex items-center space-x-2">
-//             <button className="p-2 text-gray-500 hover:text-gray-700">
-//               <Bell className="h-5 w-5" />
-//             </button>
-//             <button className="md:hidden p-2 text-gray-500 hover:text-gray-700">
-//               <Menu className="h-5 w-5" />
-//             </button>
-
-//             {showWriterMenu && (
-//               <div className="relative hidden md:block" ref={menuRef}>
-//                 <button
-//                   onClick={() => setOpen(!open)}
-//                   className="flex items-center space-x-1 text-sm font-medium text-gray-700 hover:text-black"
-//                 >
-//                   <User className="h-4 w-4" />
-//                   <span>Account</span>
-//                   <ChevronDown className="h-3 w-3" />
-//                 </button>
-
-//                 {open && (
-//                   <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg py-1 z-50">
-//                     <DropdownItem
-//                       icon={<Newspaper className="h-4 w-4" />}
-//                       label="My Blogs"
-//                       onClick={() => router.push("/My-blogs")}
-//                     />
-//                     <DropdownItem
-//                       icon={<User className="h-4 w-4" />}
-//                       label="Profile"
-//                       onClick={() => router.push("/profile")}
-//                     />
-//                     <DropdownItem
-//                       icon={<Settings className="h-4 w-4" />}
-//                       label="Manage Account"
-//                       onClick={() => router.push("/account")}
-//                     />
-//                     <hr />
-//                     <DropdownItem
-//                       icon={<LogOut className="h-4 w-4" />}
-//                       label="Sign Out"
-//                       onClick={() => signOut({ callbackUrl: "/signin" })}
-//                     />
-//                   </div>
-//                 )}
-//               </div>
-//             )}
-//           </div>
-//         </div>
-//       </div>
-//     </header>
-//   );
-// }
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
@@ -253,7 +15,6 @@ import {
   X,
 } from "lucide-react";
 
-// Custom hook for search functionality
 const useSearch = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState({
@@ -284,7 +45,6 @@ const useSearch = () => {
     }
   }, []);
 
-  // Debounced search effect
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       searchPosts(query);
@@ -307,7 +67,6 @@ const useSearch = () => {
   };
 };
 
-// Custom hook for outside click detection
 const useOutsideClick = (refs, callback) => {
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -325,7 +84,6 @@ const useOutsideClick = (refs, callback) => {
   }, [refs, callback]);
 };
 
-// Dropdown item component
 const DropdownItem = ({ icon, label, onClick, className = "" }) => (
   <button
     onClick={onClick}
@@ -336,7 +94,6 @@ const DropdownItem = ({ icon, label, onClick, className = "" }) => (
   </button>
 );
 
-// Enhanced search results component with better UX
 const SearchResults = ({ results, loading, onResultClick, query }) => {
   const hasResults =
     results.posts.length > 0 ||
@@ -499,7 +256,6 @@ const SearchResultItem = ({ title, subtitle, onClick, type }) => {
   );
 };
 
-// Enhanced search bar component with better mobile support
 const SearchBar = ({ searchRef }) => {
   const [searchOpen, setSearchOpen] = useState(false);
   const { query, setQuery, results, loading, clearSearch } = useSearch();
@@ -644,7 +400,6 @@ const SearchBar = ({ searchRef }) => {
   );
 };
 
-// Account dropdown component
 const AccountDropdown = ({ menuRef }) => {
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -660,12 +415,12 @@ const AccountDropdown = ({ menuRef }) => {
       {
         icon: <User className="h-4 w-4" />,
         label: "Profile",
-        onClick: () => router.push("/profile"),
+        onClick: () => router.push(`/Authors/${session.user.slug}`),
       },
       {
         icon: <Settings className="h-4 w-4" />,
         label: "Manage Account",
-        onClick: () => router.push("/account"),
+        onClick: () => router.push("/Account"),
       },
     ],
     [router]
@@ -718,7 +473,6 @@ const AccountDropdown = ({ menuRef }) => {
   );
 };
 
-// Mobile menu component with full functionality
 const MobileMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: session, status } = useSession();
@@ -748,12 +502,12 @@ const MobileMenu = () => {
         {
           icon: <User className="h-5 w-5" />,
           label: "Profile",
-          onClick: () => router.push("/profile"),
+          onClick: () => router.push(`/Authors/${session.user.slug}`),
         },
         {
           icon: <Settings className="h-5 w-5" />,
           label: "Manage Account",
-          onClick: () => router.push("/account"),
+          onClick: () => router.push("/Account"),
         },
         {
           icon: <LogOut className="h-5 w-5" />,
@@ -852,7 +606,6 @@ const MobileMenu = () => {
   );
 };
 
-// Main navbar component
 export default function Navbar() {
   const menuRef = useRef(null);
   const searchRef = useRef(null);
@@ -872,7 +625,7 @@ export default function Navbar() {
           {/* Logo */}
           <button
             onClick={handleLogoClick}
-            className="text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
+            className="text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
           >
             SpeedyNews
           </button>
