@@ -1,5 +1,5 @@
 // app/api/newsletter/verify/route.js
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function GET(request) {
@@ -8,12 +8,20 @@ export async function GET(request) {
     const token = searchParams.get("token");
 
     if (!token) {
-      return NextResponse.json({ success: false, error: "Token missing" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Token missing" },
+        { status: 400 }
+      );
     }
 
-    const sub = await prisma.newsletterSubscription.findUnique({ where: { token } });
+    const sub = await prisma.newsletterSubscription.findUnique({
+      where: { token },
+    });
     if (!sub) {
-      return NextResponse.json({ success: false, error: "Invalid or expired token" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Invalid or expired token" },
+        { status: 400 }
+      );
     }
 
     await prisma.newsletterSubscription.update({
@@ -24,6 +32,9 @@ export async function GET(request) {
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Server error" },
+      { status: 500 }
+    );
   }
 }

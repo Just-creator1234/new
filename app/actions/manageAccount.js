@@ -24,7 +24,7 @@ async function uniqueSlug(base) {
   let candidate = slug;
   let counter = 0;
 
-  // eslint-disable-next-line no-constant-condition
+ 
   while (true) {
     const exists = await prisma.user.findUnique({
       where: { slug: candidate },

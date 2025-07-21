@@ -12,6 +12,7 @@ import PostPreviewModal from "@/components/PostPreviewModal";
 import TiptapEditor from "@/components/TiptapEditor";
 import Image from "next/image";
 import { Flame } from "lucide-react";
+import { useSession } from "next-auth/react";
 import {
   FiEdit,
   FiEye,
@@ -46,6 +47,7 @@ export default function EditPostPage() {
   const [showPreview, setShowPreview] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
+  const { data: session } = useSession();
 
   const [categories, setCategories] = useState([]);
   const [post, setPost] = useState({
@@ -243,6 +245,10 @@ export default function EditPostPage() {
     { id: "social", label: "Social", icon: FiShare2 },
     { id: "advanced", label: "Advanced", icon: FiTrendingUp },
   ];
+
+  if (!session) {
+    router.push("/");
+  }
 
   if (loading) {
     return (

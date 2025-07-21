@@ -13,6 +13,7 @@ import toast from "react-hot-toast";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import { Flame } from "lucide-react"; // Correct import
+import { useSession } from "next-auth/react";
 
 /* --------------------------------------------------
    Icons
@@ -124,6 +125,11 @@ export default function EnhancedCreatePostPage() {
   const [validationErrors, setValidationErrors] = useState({});
   const [draftId, setDraftId] = useState(null);
   const [breaking, setBreaking] = useState(false);
+  const { data: session } = useSession();
+
+  if (!session) {
+    router.push("/");
+  }
 
   /* ---------- Effects ---------- */
 
