@@ -523,6 +523,8 @@ import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import NewsletterSignup from "@/components/NewsletterSignup";
+import TrendingSection from "@/components/TrendingSection";
+import PopularSection from "@/components/PopularSection";
 import {
   Search,
   ArrowRight,
@@ -718,7 +720,7 @@ export default function Homepage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <main className="lg-px-20 mx-auto px-20 max-sm:px-2 py-8 grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Main Content - 3/4 width */}
         <div className="lg:col-span-3 space-y-6">
           {/* Breaking News Banner */}
@@ -785,8 +787,8 @@ export default function Homepage() {
           )}
 
           {/* Category Filter */}
-          <div className="sticky top-16 z-10 bg-white/80 backdrop-blur-xl py-3 border-b border-gray-200/50 shadow-sm">
-            <div className="flex items-center space-x-2 overflow-x-auto pb-2">
+          <div className="sticky top-18 z-10 bg-white/80 backdrop-blur-xl py-3 border-b border-gray-200/50 shadow-sm">
+            <div className="flex items-center space-x-2 overflow-x-auto pt-2">
               {["all", "politics", "tech", "sports", "business", "world"].map(
                 (cat) => (
                   <button
@@ -868,10 +870,17 @@ export default function Homepage() {
         {/* Sidebar - 1/4 width */}
         <div className="space-y-6">
           <TrendingSection
-            posts={trendingPosts}
-            getCategoryColor={getCategoryColor}
+            articles={trendingPosts}
+            showViewCount={true}
+            className="mb-8"
           />
-          <PopularSection posts={popularPosts} getTimeAgo={getTimeAgo} />
+
+          <PopularSection
+            posts={popularPosts}
+            getTimeAgo={getTimeAgo}
+            title="Popular This Week"
+            maxItems={4}
+          />
 
           <NewsletterSignup />
         </div>
@@ -1000,86 +1009,4 @@ const ArticleListItem = ({ article, getCategoryColor, getTimeAgo }) => (
       </div>
     </div>
   </Link>
-);
-
-const TrendingSection = ({ posts, getCategoryColor }) => (
-  <div className="bg-yellow-50 backdrop-blur-lg rounded-2xl p-5 border border-white/20 shadow-lg">
-    <h3 className="font-semibold mb-4 flex items-center text-lg">
-      <Flame className="h-5 w-5 mr-2 text-orange-500" />
-      <span className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-        Trending Now
-      </span>
-    </h3>
-    <div className="space-y-4">
-      {posts.map((article, idx) => (
-        <div
-          key={article.id}
-          className="bg-white/50 hover:bg-white/70 backdrop-blur-sm p-3 rounded-xl border border-white/30 transition-all duration-200 hover:shadow-md"
-        >
-          <Link href={`/${article.slug}`} className="block">
-            <div className="flex items-start space-x-3">
-              <span className="font-bold text-gray-400 text-xs mt-1">
-                {idx + 1}.
-              </span>
-              <div className="min-w-0">
-                <p className="font-medium line-clamp-2 break-words whitespace-normal hover:text-blue-600 transition-colors duration-200">
-                  {article.title}
-                </p>
-                <div className="flex items-center gap-2 text-xs text-gray-500 mt-2">
-                  <span className="flex items-center">
-                    <Eye className="w-3 h-3 mr-1" />
-                    {article.viewCount?.toLocaleString() || "0"} views
-                  </span>
-                  {article.categories?.[0] && (
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-xs ${getCategoryColor(
-                        article.categories[0].name
-                      )}`}
-                    >
-                      {article.categories[0].name}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </Link>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const PopularSection = ({ posts, getTimeAgo }) => (
-  <div className="bg-purple-50 backdrop-blur-lg rounded-2xl p-5 border border-white/20 shadow-lg">
-    <h3 className="font-semibold mb-4 flex items-center text-lg">
-      <TrendingUp className="h-5 w-5 mr-2 text-blue-500" />
-      <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-        Popular Today
-      </span>
-    </h3>
-    <div className="space-y-4">
-      {posts.map((article) => (
-        <div
-          key={article.id}
-          className="bg-white/50 hover:bg-white/70 backdrop-blur-sm p-3 rounded-xl border border-white/30 transition-all duration-200 hover:shadow-md"
-        >
-          <Link href={`/${article.slug}`} className="block">
-            <p className="font-medium line-clamp-2 break-words whitespace-normal hover:text-blue-600 transition-colors duration-200">
-              {article.title}
-            </p>
-            <div className="text-xs text-gray-500 mt-2 flex items-center justify-between">
-              <span className="flex items-center">
-                <Eye className="w-3 h-3 mr-1" />
-                {article.viewCount?.toLocaleString() || "0"} views
-              </span>
-              <span className="flex items-center">
-                <Clock className="w-3 h-3 mr-1" />
-                {getTimeAgo(article.createdAt)}
-              </span>
-            </div>
-          </Link>
-        </div>
-      ))}
-    </div>
-  </div>
 );

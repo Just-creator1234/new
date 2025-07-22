@@ -21,9 +21,14 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Column */}
           <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
-            <h3 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-              SpeedyNews
-            </h3>
+            <div className="flex items-center mb-3">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mr-3">
+                <div className="w-4 h-4 bg-white rounded-sm"></div>
+              </div>
+              <button className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                SpeedyNews
+              </button>
+            </div>
             <p className="text-sm text-gray-600 leading-relaxed">
               Delivering fast and reliable news from around the world with
               cutting-edge technology and journalistic excellence.
