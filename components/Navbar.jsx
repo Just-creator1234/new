@@ -741,7 +741,7 @@ const useOutsideClick = (refs, callback) => {
 const DropdownItem = ({ icon, label, onClick, className = "" }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200 ${className}`}
+    className={`w-full flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200 ${className}  cursor-pointer`}
   >
     {icon}
     <span>{label}</span>
@@ -895,7 +895,7 @@ const SearchResultItem = ({ title, subtitle, onClick, type }) => {
   return (
     <button
       onClick={onClick}
-      className={`block w-full text-left px-3 py-3 hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0 border-l-2 ${getTypeColor()}`}
+      className={`block w-full text-left px-3 py-3 hover:bg-gray-50  transition-colors duration-200 border-b border-gray-100 last:border-b-0 border-l-2 ${getTypeColor()} cursor-pointer`}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
@@ -1095,7 +1095,7 @@ const AccountDropdown = ({ menuRef }) => {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+        className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
       >
         <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
           <User className="h-4 w-4 text-white" />
