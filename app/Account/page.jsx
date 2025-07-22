@@ -551,7 +551,7 @@ export default function ManageAccountPage() {
     if (res.error) {
       setError(res.error);
     } else {
-      location.href = "/"; // or sign-out page
+      location.href = "/signin";
     }
     setShowDeleteModal(false);
   };
