@@ -24,7 +24,6 @@ async function uniqueSlug(base) {
   let candidate = slug;
   let counter = 0;
 
- 
   while (true) {
     const exists = await prisma.user.findUnique({
       where: { slug: candidate },
@@ -89,19 +88,9 @@ export async function updateUserProfile(formData) {
   }
 
   const name = formData.get("name")?.trim();
-  const email = formData.get("email")?.trim();
 
-  if (!name || !email) {
-    return { error: "Name and email are required" };
-  }
-
-  // Email uniqueness
-  const existingEmail = await prisma.user.findUnique({
-    where: { email },
-    select: { id: true },
-  });
-  if (existingEmail && existingEmail.id !== session.user.id) {
-    return { error: "Email already in use" };
+  if (!name) {
+    return { error: "Put in the new name" };
   }
 
   // Build slug from name
@@ -109,10 +98,10 @@ export async function updateUserProfile(formData) {
 
   await prisma.user.update({
     where: { id: session.user.id },
-    data: { name, email, slug },
+    data: { name, slug },
   });
 
-  revalidatePath("/manage-account");
+  revalidatePath(`/Account`);
   return { success: true };
 }
 

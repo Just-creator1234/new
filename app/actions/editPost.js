@@ -36,6 +36,7 @@ export async function updatePost(slug, data) {
     publishDate,
   } = data;
 
+  console.log(status, "status");
   // upsert categories / tags by slug / name
   const categoryConnect = categories?.length
     ? await prisma.category.findMany({ where: { slug: { in: categories } } })
