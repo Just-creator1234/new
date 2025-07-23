@@ -10,13 +10,13 @@ export default async function PostsLayout({ children }) {
     <div className="relative">
       <SessionWrapper session={session}>
         <Navbar />
-      </SessionWrapper>
 
-      <main>
-        {children}
-        <ToasterProvider />
-      </main>
-      <Footer />
+        <main>
+          {children}
+          <ToasterProvider />
+        </main>
+        <Footer />
+      </SessionWrapper>
     </div>
   );
 }

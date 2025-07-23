@@ -8,9 +8,9 @@ export const metadata = {
   title: "SpeedyNews",
   description: "Fast And Reliable News",
   icons: {
-    icon: "/favicon.png",
-    shortcut: "/favicon.png.png",
-    apple: "/apple-touch-icon.png.png", // optional for iOS devices
+    icon: "/favicon.svg",
+    shortcut: "/favicon.png",
+    apple: "/apple-touch-icon.png", // optional for iOS devices
     other: {
       rel: "alternate icon",
       url: "/favicon.ico", // fallback for older browsers
