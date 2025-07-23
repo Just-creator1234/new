@@ -7,7 +7,6 @@ export async function getAllPublishedPosts() {
     const posts = await prisma.post.findMany({
       where: {
         status: "PUBLISHED",
-        published: true,
       },
       orderBy: [
         {

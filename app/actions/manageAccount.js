@@ -157,6 +157,23 @@ export async function getUser() {
   });
 }
 
+// export async function deleteAccount() {
+//   const session = await getServerSession(authOptions);
+//   if (!session?.user?.id) {
+//     return { error: "Unauthorized" };
+//   }
+
+//   // (optional) extra sanity check – require fresh row exists
+//   const user = await prisma.user.findUnique({
+//     where: { id: session.user.id },
+//     select: { id: true },
+//   });
+//   if (!user) return { error: "User not found" };
+
+//   await prisma.user.delete({ where: { id: user.id } });
+//   return { success: true };
+// }
+
 export async function deleteAccount() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -170,6 +187,17 @@ export async function deleteAccount() {
   });
   if (!user) return { error: "User not found" };
 
-  await prisma.user.delete({ where: { id: user.id } });
+  // Find the user's profile by the user's ID
+  const profile = await prisma.userProfile.findUnique({
+    where: { userId: user.id },
+  });
+
+  if (profile) {
+    // Delete the user's profile
+    await prisma.userProfile.delete({
+      where: { id: profile.id },
+    });
+  }
+
   return { success: true };
 }

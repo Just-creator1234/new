@@ -118,9 +118,7 @@ export default function VerifyEmailPage() {
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 SpeedyNews
               </h1>
-              <span className="ml-2 px-2 py-1 text-xs font-medium bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full">
-                For Writers
-              </span>
+             
             </motion.div>
           </div>
         </div>
