@@ -942,72 +942,15 @@ const ArticlePageClient = ({ article, relatedArticles }) => {
 
               {/* Article Content */}
               <div className="p-8">
-                <div className="prose prose-lg max-w-none">
-                  <style jsx global>{`
-                    .prose {
-                      font-family: "Georgia", serif;
-                    }
-                    .prose .lead {
-                      font-size: 1.25rem;
-                      line-height: 1.7;
-                      color: #374151;
-                      font-weight: 400;
-                      margin-bottom: 2rem;
-                      border-left: 4px solid #3b82f6;
-                      padding-left: 1.5rem;
-                      font-style: italic;
-                    }
-                    .prose h2 {
-                      font-size: 1.875rem;
-                      font-weight: 700;
-                      color: #111827;
-                      margin-top: 3rem;
-                      margin-bottom: 1.5rem;
-                      border-bottom: 2px solid #e5e7eb;
-                      padding-bottom: 0.5rem;
-                    }
-                    .prose h3 {
-                      font-size: 1.5rem;
-                      font-weight: 600;
-                      color: #111827;
-                      margin-top: 2.5rem;
-                      margin-bottom: 1rem;
-                    }
-                    .prose p {
-                      font-size: 1.125rem;
-                      line-height: 1.8;
-                      color: #374151;
-                      margin-bottom: 1.5rem;
-                    }
-                    .prose a {
-                      color: #3b82f6;
-                      text-decoration: underline;
-                    }
-                    .prose img {
-                      border-radius: 0.75rem;
-                      margin: 2rem 0;
-                    }
-                    .prose blockquote {
-                      background: linear-gradient(
-                        135deg,
-                        rgba(102, 126, 234, 0.1) 0%,
-                        rgba(118, 75, 162, 0.1) 100%
-                      );
-                      border-left: 4px solid #3b82f6;
-                      padding: 1.5rem;
-                      border-radius: 0.5rem;
-                      font-style: italic;
-                      margin: 2rem 0;
-                    }
-                    .prose ul,
-                    .prose ol {
-                      margin-bottom: 1.5rem;
-                    }
-                    .prose li {
-                      margin-bottom: 0.5rem;
-                    }
-                  `}</style>
+                <div className="prose prose-lg max-w-none w-full">
                   <div
+                    style={{
+                      wordWrap: "break-word",
+                      overflowWrap: "break-word",
+                      wordBreak: "break-word",
+                      whiteSpace: "pre-wrap", // This ensures whitespace and line breaks are preserved
+                      maxWidth: "100%",
+                    }}
                     dangerouslySetInnerHTML={{
                       __html: article.content?.html || article.content,
                     }}
@@ -1025,7 +968,7 @@ const ArticlePageClient = ({ article, relatedArticles }) => {
                         <a
                           key={tag.name}
                           href={`/tag/${tag.name}`}
-                          className="bg-gray-100/50 text-gray-700 px-3 py-1.5 rounded-full text-sm hover:bg-gray-200 transition-colors"
+                          className="bg-gray-100/50 text-gray-700 px-3 py-1.5 rounded-full text-sm hover:bg-gray-200 transition-colors break-all"
                         >
                           #{tag.name.replace(/\s+/g, "")}
                         </a>
@@ -1038,17 +981,17 @@ const ArticlePageClient = ({ article, relatedArticles }) => {
                 <div className="mt-12 pt-8 border-t border-gray-100/50">
                   <div className="bg-gradient-to-br from-gray-50/50 to-blue-50/50 rounded-2xl p-6 backdrop-blur-sm">
                     <div className="flex items-start space-x-6">
-                      <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-full w-20 h-20 flex items-center justify-center shadow-sm">
+                      <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-full w-20 h-20 flex items-center justify-center shadow-sm flex-shrink-0">
                         <User className="text-white h-8 w-8" />
                       </div>
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-900">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xl font-bold text-gray-900 break-words">
                           {article.author?.name || "Unknown Author"}
                         </h3>
-                        <p className="text-gray-600 mb-4 leading-relaxed">
+                        <p className="text-gray-600 mb-4 leading-relaxed break-words">
                           {article.author?.bio || "No bio available"}
                         </p>
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-3 flex-wrap gap-2">
                           <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:shadow-md transition-all">
                             Follow
                           </button>

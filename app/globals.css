@@ -1,1 +1,31 @@
 @import "tailwindcss";
+
+/* Force all elements in prose content to wrap */
+.prose * {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal !important;
+}
+
+/* Specific fixes for common elements */
+.prose pre,
+.prose code {
+  white-space: pre-wrap !important;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+}
+
+.prose iframe {
+  max-width: 100%;
+}
+
+/* Optional: Add responsive tables */
+.prose table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
