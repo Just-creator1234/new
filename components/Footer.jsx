@@ -20,21 +20,24 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Column */}
-          <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg flex flex-col items-center">
             <div className="flex items-center mb-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mr-3">
-                <div className="w-4 h-4 bg-white rounded-sm"></div>
-              </div>
-              <button className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                SpeedyNews
-              </button>
+              <img
+                src="/logo.png"
+                alt="AfricShowbizz Logo"
+                width={50}
+                height={50}
+                className="object-cover mr-3"
+              />
+              <h2 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                AfricShowbizz
+              </h2>
             </div>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              Delivering fast and reliable news from around the world with
-              cutting-edge technology and journalistic excellence.
+            <p className="text-sm text-gray-600 leading-relaxed text-center">
+              Your premier destination for African entertainment news, celebrity
+              updates, and showbiz stories from across the continent.
             </p>
           </div>
-
           {/* Categories Column */}
           <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-lg">
             <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4 flex items-center">

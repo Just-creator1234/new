@@ -768,14 +768,17 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mr-3">
-              <div className="w-4 h-4 bg-white rounded-sm"></div>
-            </div>
+            <img
+              src="/logo.png"
+              alt=""
+              width={80}
+              height={70}
+              className="object-cover"
+            />
             <button
               onClick={handleLogoClick}
-              className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
-            >
-              SpeedyNews
+              className="text-2xl font-bold tracking-tight bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                AfricShowbizz
             </button>
           </div>
 

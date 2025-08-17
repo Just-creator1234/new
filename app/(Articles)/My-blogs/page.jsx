@@ -1470,11 +1470,6 @@ export default function MyBlogsPage() {
     });
 
   /* ---------- loading skeleton ---------- */
-  useEffect(() => {
-    if (!session) {
-      router.push("/signin");
-    }
-  }, [session, router]);
 
   const LoadingSkeleton = () => (
     <div className="space-y-6">

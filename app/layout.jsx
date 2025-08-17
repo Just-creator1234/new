@@ -8,7 +8,7 @@ export const metadata = {
   title: "SpeedyNews",
   description: "Fast And Reliable News",
   icons: {
-    icon: "/favicon.svg",
+    icon: "/logo.png",
     shortcut: "/favicon.png",
     apple: "/apple-touch-icon.png", // optional for iOS devices
     other: {
