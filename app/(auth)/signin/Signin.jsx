@@ -122,6 +122,7 @@ export default function SignInPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.6 }}
+              onClick={() => signIn("google")}
             >
               Sign in to access your account
             </motion.p>
