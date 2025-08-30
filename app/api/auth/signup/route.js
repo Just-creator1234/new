@@ -94,12 +94,6 @@ export async function POST(request) {
       );
     }
 
-    const adminEmails = [
-      "jackright198765@gmail.com",
-      "darlingtonboateng18@gmail.com",
-    ];
-    const isAdmin = adminEmails.includes(email.toLowerCase());
-
     const baseSlug = slugify(name.trim(), { lower: true, strict: true });
     let slug = baseSlug;
     let counter = 1;
@@ -118,7 +112,6 @@ export async function POST(request) {
         email: email.toLowerCase(),
         password: hashedPassword,
         emailVerified: null,
-        role: isAdmin ? "ADMIN" : "WRITER",
         slug,
       },
       select: { id: true, email: true },
