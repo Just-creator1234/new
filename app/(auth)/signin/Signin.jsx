@@ -254,9 +254,7 @@ export default function SignInPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1, duration: 0.6 }}
               className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-200 p-4 rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md"
-              onClick={() => {
-                signIn("google");
-              }}
+              onClick={() => signIn("google")}
             >
               <img src="/google.svg" alt="Google icon" className="w-5 h-5" />
               <span className="text-gray-700 font-medium">
