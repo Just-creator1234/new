@@ -216,7 +216,9 @@ const SignUpForm = ({
               type="button"
             >
               <img src="/google.svg" alt="Google icon" className="w-5 h-5" />
-              <button onClick={() => signIn("google")}>
+              <button
+                onClick={() => signIn("google", { callbackUrl: "/My-blogs" })}
+              >
                 Sign Up With Google
               </button>
             </motion.button>
