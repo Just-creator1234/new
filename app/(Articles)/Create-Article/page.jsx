@@ -61,6 +61,7 @@ const useDebounce = (fn, delay) => {
 -------------------------------------------------- */
 export default function EnhancedCreatePostPage() {
   const router = useRouter();
+  const AUTO_SAVE_DELAY = 3000; // 3 second
 
   /* ---------- Content ---------- */
   const [title, setTitle] = useState("");
@@ -70,8 +71,11 @@ export default function EnhancedCreatePostPage() {
   const [excerpt, setExcerpt] = useState("");
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState("");
-  const [newCategory, setNewCategory] = useState("");
-  const [isDirty, setIsDirty] = useState(false);
+  // Add this with your other state declarations
+  const [isSaving, setIsSaving] = useState(false); // ← ADD THIS LINE
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+  // Add this too for the queue system
+  const [saveQueue, setSaveQueue] = useState([]); // ← ADD THIS LINE
 
   /* ---------- Media ---------- */
   const [coverImageFile, setCoverImageFile] = useState(null);
@@ -113,6 +117,8 @@ export default function EnhancedCreatePostPage() {
   const [coAuthors, setCoAuthors] = useState([]);
   const [editorNotes, setEditorNotes] = useState("");
   const [customFields, setCustomFields] = useState({});
+  // This is already in your code - near the top of your component
+  const [isDirty, setIsDirty] = useState(false);
 
   /* ---------- UI ---------- */
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -262,6 +268,8 @@ export default function EnhancedCreatePostPage() {
     fd.append("ogDescription", ogDescription);
     fd.append("ogImage", ogImage);
     fd.append("twitterCard", twitterCard);
+
+    if (draftId) fd.append("draftId", draftId);
     if (status === "PUBLISHED" || status === "SCHEDULED")
       fd.append("publishDate", new Date().toISOString());
     if (coverImageUrl) fd.append("coverImage", coverImageUrl);
@@ -290,6 +298,7 @@ export default function EnhancedCreatePostPage() {
 
     try {
       const res = await createPost(fd);
+      localStorage.removeItem("currentDraft");
       toast.success(res.message || "Post created!");
       router.push("/My-blogs");
     } catch {
@@ -298,7 +307,198 @@ export default function EnhancedCreatePostPage() {
       setIsSubmitting(false);
     }
   };
+  const handleAutoSave = useCallback(
+    debounce(async () => {
+      if (!isDirty || isSubmitting || isSaving) {
+        // If already saving, queue this save for later
+        if (isDirty && !isSaving) {
+          setSaveQueue((prev) => [...prev, "pending"]);
+        }
+        return;
+      }
 
+      setIsSaving(true);
+      setIsAutoSaving(true);
+
+      try {
+        const formData = new FormData();
+        formData.append("status", "DRAFT");
+        formData.append("title", title);
+        formData.append("slug", slug);
+        formData.append("content", content);
+        formData.append("excerpt", excerpt);
+        formData.append("categories", JSON.stringify(selectedCategories));
+        formData.append("tags", JSON.stringify(tags));
+
+        // CRITICAL: Only include draftId if we have one
+        if (draftId) {
+          formData.append("draftId", draftId);
+        }
+
+        if (coverImageUrl) formData.append("coverImage", coverImageUrl);
+        formData.append("breaking", String(breaking));
+
+        const result = await createPost(formData);
+
+        if (result.post?.id) {
+          setDraftId(result.post.id);
+          setLastSaved(new Date());
+          setIsDirty(false);
+        }
+      } catch (error) {
+        console.error("Auto-save failed:", error);
+      } finally {
+        setIsSaving(false);
+        setIsAutoSaving(false);
+
+        // Process any queued saves
+        if (saveQueue.length > 0) {
+          setSaveQueue((prev) => prev.slice(1)); // Remove one from queue
+          // Trigger next save after a short delay
+          setTimeout(() => handleAutoSave(), 1000);
+        }
+      }
+    }, AUTO_SAVE_DELAY),
+    [
+      title,
+      content,
+      excerpt,
+      slug,
+      selectedCategories,
+      tags,
+      coverImageUrl,
+      breaking,
+      isDirty,
+      isSubmitting,
+      draftId,
+      isSaving,
+      saveQueue,
+    ]
+  );
+  /* ---------- Auto Save Triggers ---------- */
+  useEffect(() => {
+    if (isDirty) {
+      handleAutoSave();
+    }
+  }, [title, content, excerpt, handleAutoSave, isDirty]);
+
+  useEffect(() => {
+    return () => {
+      handleAutoSave.cancel(); // Cancel any pending auto-save on unmount
+    };
+  }, [handleAutoSave]); // ADDED handleAutoSave to dependency array
+
+  // Add near your other useEffect hooks
+  useEffect(() => {
+    // Save draft data to localStorage whenever it changes
+    if (isDirty && (title.trim() || content.trim())) {
+      const draftData = {
+        title,
+        content,
+        excerpt,
+        slug,
+        selectedCategories,
+        tags,
+        coverImageUrl,
+        breaking,
+        draftId, // Save the draft ID too!
+        timestamp: new Date().toISOString(),
+      };
+      localStorage.setItem("currentDraft", JSON.stringify(draftData));
+    }
+  }, [
+    title,
+    content,
+    excerpt,
+    slug,
+    selectedCategories,
+    tags,
+    coverImageUrl,
+    breaking,
+    draftId,
+    isDirty,
+  ]);
+
+  // Add this near your other useEffect hooks (runs once on mount)
+  useEffect(() => {
+    const recoverDraft = async () => {
+      try {
+        const savedDraft = localStorage.getItem("currentDraft");
+        if (savedDraft) {
+          const draftData = JSON.parse(savedDraft);
+
+          // Ask user if they want to recover the draft
+          const shouldRecover = window.confirm(
+            "Found unsaved changes from your previous session. Would you like to recover them?"
+          );
+
+          if (shouldRecover) {
+            // Restore all fields from localStorage
+            setTitle(draftData.title || "");
+            setContent(draftData.content || "");
+            setExcerpt(draftData.excerpt || "");
+            setSlug(draftData.slug || "");
+            setSelectedCategories(draftData.selectedCategories || []);
+            setTags(draftData.tags || []);
+            setCoverImageUrl(draftData.coverImageUrl || "");
+            setBreaking(draftData.breaking || false);
+
+            // Restore the draftId if we have one
+            if (draftData.draftId) {
+              setDraftId(draftData.draftId);
+            }
+
+            setIsDirty(true);
+            toast.success("Draft recovered successfully!");
+          } else {
+            // User doesn't want to recover, clear the saved draft
+            localStorage.removeItem("currentDraft");
+          }
+        }
+      } catch (error) {
+        console.error("Error recovering draft:", error);
+      }
+    };
+
+    recoverDraft();
+  }, []);
+
+  // Add this useEffect
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue =
+          "You have unsaved changes. Are you sure you want to leave?";
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isDirty]);
+
+  // Add this useEffect to clean up old save records
+  useEffect(() => {
+    const cleanupOldSaves = () => {
+      const recentSaves = localStorage.getItem("recentSaves");
+      if (recentSaves) {
+        const saves = JSON.parse(recentSaves);
+        const filteredSaves = saves.filter(
+          (save) => Date.now() - new Date(save.timestamp).getTime() < 300000 // 5 minutes
+        );
+        localStorage.setItem("recentSaves", JSON.stringify(filteredSaves));
+      }
+    };
+
+    // Clean up every minute
+    const interval = setInterval(cleanupOldSaves, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
   /* ---------- UI helpers ---------- */
   const wordCount = useMemo(
     () =>
@@ -350,12 +550,19 @@ export default function EnhancedCreatePostPage() {
                   <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     Create New Post
                   </h1>
-                  {lastSaved && (
+                  {isAutoSaving ? (
+                    <div className="text-xs text-blue-500 flex items-center">
+                      <div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-1"></div>
+                      Auto-saving...
+                    </div>
+                  ) : lastSaved ? (
                     <p className="text-xs text-gray-500">
                       Last saved{" "}
                       {formatDistanceToNow(lastSaved, { addSuffix: true })}
                     </p>
-                  )}
+                  ) : isDirty ? (
+                    <p className="text-xs text-amber-500">Unsaved changes</p>
+                  ) : null}
                 </div>
               </div>
               <div className="flex gap-3">
@@ -366,6 +573,16 @@ export default function EnhancedCreatePostPage() {
                   <Eye className="h-4 w-4" />
                   Preview
                 </button>
+
+                <button
+                  onClick={handleSaveDraft}
+                  disabled={isSubmitting || !isDirty}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-100 border border-gray-200 text-gray-700 font-medium rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FileText className="h-4 w-4" />
+                  Save Draft
+                </button>
+
                 <button
                   onClick={() => handleSubmit(status)}
                   disabled={isSubmitting}
@@ -451,8 +668,6 @@ export default function EnhancedCreatePostPage() {
                   </div>
 
                   <div className="bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 overflow-hidden">
-                 
-
                     <TiptapEditor
                       content={content}
                       onChange={debouncedSetContent}

@@ -29,6 +29,7 @@ import {
   FiImage,
 } from "react-icons/fi";
 
+import { debounce } from "lodash";
 export default function EditPostPage() {
   const router = useRouter();
   const { slug } = useParams();
@@ -39,6 +40,12 @@ export default function EditPostPage() {
   const [showPreview, setShowPreview] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
+  // Add these to your state declarations
+  const [isDirty, setIsDirty] = useState(false);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveQueue, setSaveQueue] = useState([]);
+  const AUTO_SAVE_DELAY = 3000;
 
   const [categories, setCategories] = useState([]);
   const [post, setPost] = useState({
@@ -102,6 +109,7 @@ export default function EditPostPage() {
     const fetchPost = async () => {
       setLoading(true);
       const data = await getPostBySlug(slug);
+      console.log(data, "ggggggggggggg");
 
       if (data) {
         setPost({
@@ -216,6 +224,86 @@ export default function EditPostPage() {
       setIsSubmitting(false);
     }
   };
+  const handleAutoSave = useCallback(async () => {
+    if (!isDirty || isSubmitting || isSaving) {
+      if (isDirty && !isSaving) {
+        setSaveQueue((prev) => [...prev, "pending"]);
+      }
+      return;
+    }
+
+    setIsSaving(true);
+    setIsAutoSaving(true);
+
+    try {
+      await updatePost(slug, post);
+      setLastSaved(new Date());
+      setIsDirty(false);
+    } catch (error) {
+      console.error("Auto-save failed:", error);
+    } finally {
+      setIsSaving(false);
+      setIsAutoSaving(false);
+
+      if (saveQueue.length > 0) {
+        setSaveQueue((prev) => prev.slice(1));
+        setTimeout(() => handleAutoSave(), 1000);
+      }
+    }
+  }, [post, slug, isDirty, isSubmitting, isSaving, saveQueue]);
+
+  // Create debounced version - FIXED
+  const debouncedAutoSave = useCallback(
+    debounce(() => {
+      handleAutoSave();
+    }, AUTO_SAVE_DELAY),
+    [handleAutoSave] // Only depend on handleAutoSave
+  );
+
+  // Auto-save trigger - CORRECT
+  useEffect(() => {
+    if (isDirty) {
+      debouncedAutoSave();
+    }
+  }, [post.title, post.content, post.excerpt, isDirty, debouncedAutoSave]);
+
+  // Cleanup on unmount - ADD THIS
+  useEffect(() => {
+    return () => {
+      debouncedAutoSave.cancel();
+    };
+  }, [debouncedAutoSave]);
+
+  // Dirty state tracker - CORRECT
+  useEffect(() => {
+    setIsDirty(true);
+  }, [
+    post.title,
+    post.content,
+    post.excerpt,
+    post.tags,
+    post.categories,
+    post.coverImage,
+    post.metaTitle,
+    post.metaDescription,
+  ]);
+
+  // Beforeunload warning - CORRECT
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue =
+          "You have unsaved changes. Are you sure you want to leave?";
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
+
+  // Add this cleanup useEffect
 
   const wordCount = useMemo(
     () =>
@@ -257,11 +345,18 @@ export default function EditPostPage() {
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Edit Post
             </h1>
-            {lastSaved && (
+            {isAutoSaving ? (
+              <div className="text-sm text-blue-500 flex items-center">
+                <div className="w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-1"></div>
+                Auto-saving...
+              </div>
+            ) : lastSaved ? (
               <p className="text-sm text-gray-500">
                 Last saved {formatDistanceToNow(lastSaved, { addSuffix: true })}
               </p>
-            )}
+            ) : isDirty ? (
+              <p className="text-sm text-amber-500">Unsaved changes</p>
+            ) : null}
           </div>
           <div className="flex gap-3">
             <button
@@ -337,7 +432,7 @@ export default function EditPostPage() {
                 )}
 
                 <div className="flex items-center gap-2">
-                  <span className="text-gray-500">speedynews.com/</span>
+                  <span className="text-gray-500">AfricShowbizz.com/</span>
                   <input
                     value={post.slug}
                     onChange={(e) => setPost({ ...post, slug: e.target.value })}

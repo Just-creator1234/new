@@ -67,11 +67,10 @@
 //   );
 // }
 
-
 "use client";
 
 import { useState, useTransition } from "react";
-import { Trash2, X, AlertTriangle } from "lucide-react";
+import { Trash2, X, AlertTriangle, Loader2 } from "lucide-react";
 import { deletePostById } from "@/app/actions/deletePost";
 import toast from "react-hot-toast";
 
@@ -111,7 +110,7 @@ export default function BlogItem({ post, onPostUpdated }) {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in">
-          <div 
+          <div
             className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-2xl border border-white/20 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
@@ -134,7 +133,8 @@ export default function BlogItem({ post, onPostUpdated }) {
 
             <p className="text-gray-600 mb-6">
               Are you sure you want to delete{" "}
-              <strong className="text-gray-900">{post.title}</strong>? This action cannot be undone.
+              <strong className="text-gray-900">{post.title}</strong>? This
+              action cannot be undone.
             </p>
 
             <div className="flex justify-end gap-3">
