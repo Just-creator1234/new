@@ -22,6 +22,11 @@ export async function subscribeNewsletter(rawEmail) {
       return { success: false, error: "You have already subscribed." };
     }
 
+    // Add rate limiting
+    if (existing && existing.createdAt > new Date(Date.now() - 5 * 60 * 1000)) {
+      return { success: false, error: "Please wait before trying again" };
+    }
+
     // 3. Not verified (or doesn’t exist) → issue/re-issue token & send mail
     const token = crypto.randomBytes(32).toString("hex");
 
