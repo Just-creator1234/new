@@ -81,7 +81,7 @@ export async function renderEmailTemplate(posts, subscriberEmail) {
           line-height: 1.4;
         }
         .post-excerpt {
-          color: #64748b;
+          color: #FFFFFF;
           font-size: 15px;
           margin: 0 0 16px 0;
           line-height: 1.5;
