@@ -106,7 +106,7 @@ export async function sendVerificationEmail(email) {
           }
           .verify-button {
             display: inline-block;
-            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            background: #ffffff;
             color: white;
             text-decoration: none;
             padding: 16px 32px;

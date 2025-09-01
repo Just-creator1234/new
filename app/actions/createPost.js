@@ -308,6 +308,8 @@ export async function createPost(formData) {
     });
   }
 
+  console.log(post, "hghhggg")
+
   revalidatePath("/Blogs");
   return { success: true, message: "Post created!", post };
 }

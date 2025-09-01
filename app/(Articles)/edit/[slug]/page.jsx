@@ -303,6 +303,20 @@ export default function EditPostPage() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
 
+  const formatDateForInput = (date) => {
+    if (!date) return "";
+
+    const d = new Date(date);
+    // Format: YYYY-MM-DDTHH:MM
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}-${String(d.getDate()).padStart(2, "0")}T${String(d.getHours()).padStart(
+      2,
+      "0"
+    )}:${String(d.getMinutes()).padStart(2, "0")}`;
+  };
+
   // Add this cleanup useEffect
 
   const wordCount = useMemo(
@@ -616,9 +630,16 @@ export default function EditPostPage() {
                     </label>
                     <input
                       type="datetime-local"
-                      value={post.publishDate}
+                      value={
+                        post.publishDate
+                          ? formatDateForInput(post.publishDate)
+                          : ""
+                      }
                       onChange={(e) =>
-                        setPost({ ...post, publishDate: e.target.value })
+                        setPost({
+                          ...post,
+                          publishDate: new Date(e.target.value),
+                        })
                       }
                       className="w-full p-3 rounded-lg border-2 border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 bg-white/50"
                     />

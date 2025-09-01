@@ -76,7 +76,7 @@ model Post {
   excerpt     String?
   published   Boolean   @default(false)
   status      String    @default("DRAFT") // DRAFT | PUBLISHED | SCHEDULED
-  publishDate DateTime? // when status === SCHEDULED
+  publishDate DateTime? 
    publishedAt DateTime?
 
   /**
