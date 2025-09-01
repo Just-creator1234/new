@@ -25,9 +25,9 @@ const Footer = () => {
               <img
                 src="/logo.png"
                 alt="AfricShowbizz Logo"
-                width={50}
-                height={50}
-                className="object-cover mr-3"
+                width={60}
+                height={60}
+                className="object-cover  "
               />
               <h2 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 bg-clip-text text-transparent">
                 AfricShowbizz

@@ -53,8 +53,14 @@ export default function Navbar() {
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 py-3">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <div className="flex items-center">
+            <img
+              src="/logo.png"
+              alt="AfricShowbizz Logo"
+              width={100}
+              height={100}
+              className="object-cover "
+            />
             <button
               onClick={handleLogoClick}
               className="text-2xl font-bold tracking-tight bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 bg-clip-text text-transparent"

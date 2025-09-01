@@ -12,7 +12,7 @@ const PopularSection = ({
     <div className={`bg-white/80 backdrop-blur-lg rounded-2xl overflow-hidden shadow-xl border border-white/20 ${className}`}>
       {/* Header with gradient background */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
-        <h3 className="text-lg font-bold text-white flex items-center">
+        <h3 className="text-lg font-bold text-white flex items-center whitespace-normal break-words">
           <TrendingUp className="h-5 w-5 mr-2" />
           {title}
         </h3>
@@ -24,10 +24,10 @@ const PopularSection = ({
           <Link 
             key={article.id} 
             href={`/${article.slug}`}
-            className="group block"
+            className="group block whitespace-normal break-words"
           >
             <div className="bg-white/50 hover:bg-white/70 backdrop-blur-sm p-4 rounded-xl border border-white/30 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
-              <h4 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+              <h4 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 whitespace-normal break-words">
                 {article.title}
               </h4>
               <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
