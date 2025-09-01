@@ -7,17 +7,13 @@ const LoadingComponent = () => {
       <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-8 border border-white/20 shadow-lg flex flex-col items-center max-w-md w-full">
         {/* Logo and Brand Section */}
         <div className="flex items-center mb-6">
-          <div className="relative">
-            <img
-              src="/logo.png"
-              alt="AfricShowbizz Logo"
-              width={60}
-              height={60}
-              className="object-cover animate-pulse"
-            />
-            {/* Spinning ring around logo */}
-            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-amber-500 animate-spin"></div>
-          </div>
+          <img
+            src="/logo.png"
+            alt="AfricShowbizz Logo"
+            width={60}
+            height={60}
+            className="object-cover animate-pulse"
+          />
           <h2 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 bg-clip-text text-transparent ml-3">
             AfricShowbizz
           </h2>
