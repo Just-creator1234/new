@@ -1,0 +1,32 @@
+# .github/workflows/publish-scheduled-posts.yml
+name: Publish Scheduled Posts
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # Every 5 minutes
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  publish-scheduled:
+    runs-on: ubuntu-latest
+    name: Publish scheduled posts
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run publish script
+        run: npm run publish-scheduled
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          NODE_ENV: production
