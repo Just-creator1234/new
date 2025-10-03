@@ -23,7 +23,7 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      {/* 👇 add this prop */}
+     
       <body suppressHydrationWarning>
         <SessionWrapper session={session}>{children}</SessionWrapper>
       </body>
